@@ -84,7 +84,7 @@ spd-eclipse/
 4. コード生成機能（方式は未決定：ルールベース変換 / Copilot 連携 / Claude Code CLI 呼び出し）
    - API キーをプラグインに埋め込まない。必要なら設定画面（PreferencePage）で利用者が入力する
 5. 「名前を付けて保存」、ワークスペース外ファイル（IURIEditorInput）への対応
-6. アイコン、ヘルプ、ライセンス（`spd.feature/feature.xml` の TODO）
+6. ヘルプ（アイコンとライセンスは済み。ライセンスは EPL-2.0：`LICENSE`・`feature.xml`・MANIFEST の `Bundle-License`）
 
 ## ビルド
 

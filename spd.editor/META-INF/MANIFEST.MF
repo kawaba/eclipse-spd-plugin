@@ -4,6 +4,7 @@ Bundle-Name: SPD Editor
 Bundle-SymbolicName: work.powercampus.spd.editor;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: powercampus.work
+Bundle-License: EPL-2.0
 Bundle-Activator: work.powercampus.spd.editor.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17

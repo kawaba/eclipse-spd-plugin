@@ -1,20 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<feature
-      id="work.powercampus.spd.feature"
-      label="SPD Editor"
-      version="0.1.0.qualifier"
-      provider-name="powercampus.work">
-
-   <description>
-      SPD（構造化プログラム図）を作成・編集するためのエディタです。
-   </description>
-
-   <copyright>
-      Copyright (c) 2026 Takashi
-   </copyright>
-
-   <!-- ライセンス本文（インストール時の「使用条件」画面に表示される）。リポジトリ直下の LICENSE と同じ -->
-   <license url="https://www.eclipse.org/legal/epl-2.0/">
 Eclipse Public License - v 2.0
 
     THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE
@@ -292,10 +275,3 @@ version(s), and exceptions or additional permissions here}."
   look for such a notice.
 
   You may add additional accurate notices of copyright ownership.
-   </license>
-
-   <plugin
-         id="work.powercampus.spd.editor"
-         version="0.0.0"/>
-
-</feature>
