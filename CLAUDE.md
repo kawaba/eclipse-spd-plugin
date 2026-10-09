@@ -14,7 +14,7 @@ Claude Code はこのファイルの方針に従って作業してください�
 ## 構成
 
 ```
-spd-eclipse/
+eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 ├── pom.xml                 親POM（Tycho）
 ├── spd.editor/             プラグイン本体
 │   ├── META-INF/MANIFEST.MF
