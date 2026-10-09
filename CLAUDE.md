@@ -18,10 +18,14 @@ spd-eclipse/
 ├── pom.xml                 親POM（Tycho）
 ├── spd.editor/             プラグイン本体
 │   ├── META-INF/MANIFEST.MF
-│   ├── plugin.xml          .spd の関連付け、エディタ登録
+│   ├── plugin.xml          .spd の関連付け、エディタ・ビュー・ウィザード・メニュー「SPD」・ツールバー
+│   ├── icons/spd.png       アイコン（16px と @2x の 32px）
 │   ├── src/work/powercampus/spd/editor/
 │   │   ├── Activator.java
-│   │   ├── SpdEditor.java  Browser ウィジェットで web/editor.html を表示
+│   │   ├── SpdBrowser.java Browser で web/editor.html を表示し、約束事の Java 側を持つ（エディタ・ビュー共用）
+│   │   ├── SpdView.java    ファイルなしで使う SPD ビュー（主な使い方）。内容は .metadata に自動保管、
+│   │   │                   「保存…」で名前を付けて .spd に保存
+│   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（保存＝上書き、ダーティ表示）
 │   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
 │   └── web/editor.html     既存 SPD エディタ（D:\★SPD\spd-editor\spd-editor.html）＋ Eclipse 連携
 ├── spd.feature/            Feature（Marketplace 登録に必要）
@@ -35,8 +39,8 @@ spd-eclipse/
 | Java → JS | `loadSpd(text)` | ファイル内容（文字列）を画面に読み込む。読み込み中は変更通知を出さない |
 | Java → JS | `getSpdText()` | 保存用に現在の SPD テキストを文字列で返す |
 | JS → Java | `spdGetInitialText()` | ファイル内容を取得する（Java の BrowserFunction） |
-| JS → Java | `spdNotifyChanged()` | 編集されたら呼ぶ（エディタタブに * が付く） |
-| JS → Java | `spdRequestSave()` | Ctrl+S をブラウザ側が受けたとき Eclipse の保存を呼ぶ |
+| JS → Java | `spdNotifyChanged()` | 編集されたら呼ぶ（エディタ：未保存表示。ビュー：自動保管） |
+| JS → Java | `spdRequestSave()` | Ctrl+S・「保存」ボタン（エディタ：上書き保存。ビュー：名前を付けて保存） |
 
 - Java から JS へ文字列を渡すときは、`execute("f('" + text + "')")` のような文字列連結をしない。
   エスケープ漏れを避けるため、JS 側から BrowserFunction で取得させる。
@@ -46,8 +50,10 @@ spd-eclipse/
   既存エディタを単体のブラウザでも動かせるようにしておくため。
 - `.spd` ファイルの形式は下の「.spd ファイル形式」を参照。
   `loadSpd` は空文字（新規ファイル）と、JSON でない SPD テキスト（Export 形式）も受け付ける。
-- Java は `web/editor.html?host=eclipse` で開く。JS 側はこれ（または BrowserFunction の有無）で
+- Java は `web/editor.html?host=eclipse&mode=editor|view` で開く。JS 側は host（または BrowserFunction の有無）で
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
+  mode=view では「保存」ボタンを「保存…」（名前を付けて保存）と表示する。
+- Eclipse 2026 では未保存のエディタはタブ名に `*` が付かず、閉じるボタン × が ● になる（既定の設定）。
 - `web/spd-config.js`（既定の言語）と `web/spd-patterns.js`（スケルトン）は既存エディタの `2-java/` から複製したもの。
 
 ## .spd ファイル形式（2026-10-09 決定）

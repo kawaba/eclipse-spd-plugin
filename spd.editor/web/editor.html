@@ -144,6 +144,9 @@
    念のため Java の BrowserFunction が登録済みかどうかでも判定する。 */
 const IN_ECLIPSE = /[?&]host=eclipse(&|$)/.test(location.search)
                 || typeof window.spdGetInitialText === "function";
+/* Eclipse 内での画面の種類。"editor"＝.spd ファイルのエディタ（保存＝上書き）、
+   "view"＝ファイルなしで使うビュー（保存＝名前を付けて .spd に保存） */
+const ECLIPSE_MODE = (location.search.match(/[?&]mode=(\w+)/) || [])[1] || "editor";
 
 /* ===== 設定 ===== */
 const COLS = 90, ROWS = 500, CELLW = 18, CELLH = 22, FONT = 16, RNUMW = 34;
@@ -371,8 +374,14 @@ function renderToolbox(){
       loadB.onclick = doLoad;
       row.appendChild(saveB);
       // Eclipse 内では「保存」は Eclipse の保存（Ctrl+S と同じ）。ファイルは Eclipse 側で開くので「開く」は出さない
-      if (IN_ECLIPSE) saveB.title = "Eclipse でファイルへ保存 (Ctrl+S)";
-      else            row.appendChild(loadB);
+      if (IN_ECLIPSE && ECLIPSE_MODE === "view"){
+        saveB.textContent = "保存…";
+        saveB.title = "名前を付けて .spd ファイルに保存 (Ctrl+S)。保存しなくても内容は Eclipse に保管されます";
+      } else if (IN_ECLIPSE){
+        saveB.title = "Eclipse でファイルへ保存 (Ctrl+S)";
+      } else {
+        row.appendChild(loadB);
+      }
     }
     toolbox.appendChild(row);
   });

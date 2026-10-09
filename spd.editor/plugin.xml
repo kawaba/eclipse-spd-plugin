@@ -14,16 +14,33 @@
       </content-type>
    </extension>
 
-   <!-- SPDエディタ本体 -->
+   <!-- SPDエディタ本体（.spd ファイルを開いたとき） -->
    <extension point="org.eclipse.ui.editors">
       <editor
             id="work.powercampus.spd.editor.SpdEditor"
             name="SPD Editor"
+            icon="icons/spd.png"
             class="work.powercampus.spd.editor.SpdEditor"
             extensions="spd"
             default="true">
          <contentTypeBinding contentTypeId="work.powercampus.spd.contentType"/>
       </editor>
+   </extension>
+
+   <!-- SPD エディタのビュー（ファイルを作らずに使う。ウィンドウ → ビューの表示 → その他 → SPD） -->
+   <extension point="org.eclipse.ui.views">
+      <category
+            id="work.powercampus.spd.viewCategory"
+            name="SPD">
+      </category>
+      <view
+            id="work.powercampus.spd.editor.SpdView"
+            name="SPD エディタ"
+            icon="icons/spd.png"
+            category="work.powercampus.spd.viewCategory"
+            class="work.powercampus.spd.editor.SpdView"
+            allowMultiple="false">
+      </view>
    </extension>
 
    <!-- 新規 SPD ファイル作成ウィザード（ファイル → 新規 → その他 → SPD） -->
@@ -35,18 +52,66 @@
       <wizard
             id="work.powercampus.spd.editor.SpdNewFileWizard"
             name="SPD ファイル"
+            icon="icons/spd.png"
             category="work.powercampus.spd.category"
             class="work.powercampus.spd.editor.SpdNewFileWizard">
          <description>言語を選んで、新しい SPD ファイル（.spd）を作成します</description>
       </wizard>
    </extension>
 
-   <!-- Java・リソース パースペクティブでは「ファイル → 新規」に直接表示する -->
+   <!-- メニュー「SPD」とツールバーのボタン（Eclipse 標準のコマンドを使うのでハンドラーは不要） -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu id="work.powercampus.spd.menu" label="SPD">
+            <command
+                  commandId="org.eclipse.ui.views.showView"
+                  label="SPD エディタを開く"
+                  icon="icons/spd.png"
+                  style="push">
+               <parameter name="org.eclipse.ui.views.showView.viewId"
+                     value="work.powercampus.spd.editor.SpdView"/>
+            </command>
+            <command
+                  commandId="org.eclipse.ui.newWizard"
+                  label="新規 SPD ファイル..."
+                  style="push">
+               <parameter name="newWizardId"
+                     value="work.powercampus.spd.editor.SpdNewFileWizard"/>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar id="work.powercampus.spd.toolbar" label="SPD">
+            <command
+                  commandId="org.eclipse.ui.views.showView"
+                  icon="icons/spd.png"
+                  tooltip="SPD エディタを開く"
+                  style="push">
+               <parameter name="org.eclipse.ui.views.showView.viewId"
+                     value="work.powercampus.spd.editor.SpdView"/>
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+
+   <!-- Java・リソース パースペクティブ：
+        SPD ビューは「問題」ビューと同じ場所（下部・横長）に開く。
+        「ファイル → 新規」「ウィンドウ → ビューの表示」に直接表示する -->
    <extension point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view id="work.powercampus.spd.editor.SpdView"
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="stack"
+               visible="false"/>
+         <viewShortcut id="work.powercampus.spd.editor.SpdView"/>
          <newWizardShortcut id="work.powercampus.spd.editor.SpdNewFileWizard"/>
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <view id="work.powercampus.spd.editor.SpdView"
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="stack"
+               visible="false"/>
+         <viewShortcut id="work.powercampus.spd.editor.SpdView"/>
          <newWizardShortcut id="work.powercampus.spd.editor.SpdNewFileWizard"/>
       </perspectiveExtension>
    </extension>

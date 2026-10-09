@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -65,8 +63,7 @@ public class SpdNewFileWizard extends BasicNewResourceWizard {
             try {
                 IDE.openEditor(wbPage, file, SpdEditor.ID);
             } catch (PartInitException e) {
-                Activator.getDefault().getLog().log(
-                        new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+                Activator.log(e);
             }
         }
         return true;
