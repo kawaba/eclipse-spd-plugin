@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SPD Editor</title>
 <style>
+  /* 罫線を全角幅で表示するフォント（v1.19.1）。PC にインストール済みならそれを使い、
+     無ければ同じフォルダの fonts/ から読む（Eclipse プラグインは fonts/ を同梱。単体版は無ければ次の候補へ） */
+  @font-face{
+    font-family: "PlemolJP HS";
+    src: local("PlemolJP HS Regular"), local("PlemolJPHS-Regular"),
+         url("fonts/PlemolJPHS-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
   :root{
     --bg: #fcfcfa; --panel: #f0efea; --line: #d9d7cf; --line-strong: #b8b5aa;
     --text: #2a2a28; --text-dim: #8a877c; --accent: #2f6fb0; --accent-bg: #e3eefa;
@@ -103,7 +112,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.19.0</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.19.1</span></h1>
   </div>
 </div>
 

@@ -59,7 +59,17 @@
       </wizard>
    </extension>
 
-   <!-- メニュー「SPD」とツールバーのボタン（Eclipse 標準のコマンドを使うのでハンドラーは不要） -->
+   <!-- フォントのフォルダを開くコマンド（web/fonts/ をエクスプローラーで開く） -->
+   <extension point="org.eclipse.ui.commands">
+      <command
+            id="work.powercampus.spd.openFontFolder"
+            name="フォントのフォルダを開く"
+            description="SPD エディタ用フォント（PlemolJP HS）と Eclipse のフォント設定（spd-font.epf）のフォルダを開きます"
+            defaultHandler="work.powercampus.spd.editor.OpenFontFolderHandler">
+      </command>
+   </extension>
+
+   <!-- メニュー「SPD」とツールバーのボタン（表示・新規は Eclipse 標準のコマンドを使う） -->
    <extension point="org.eclipse.ui.menus">
       <menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu id="work.powercampus.spd.menu" label="SPD">
@@ -77,6 +87,12 @@
                   style="push">
                <parameter name="newWizardId"
                      value="work.powercampus.spd.editor.SpdNewFileWizard"/>
+            </command>
+            <separator name="font" visible="true"/>
+            <command
+                  commandId="work.powercampus.spd.openFontFolder"
+                  label="フォントのフォルダを開く"
+                  style="push">
             </command>
          </menu>
       </menuContribution>

@@ -27,7 +27,9 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 │   │   │                   「保存…」で名前を付けて .spd に保存
 │   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（保存＝上書き、ダーティ表示）
 │   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
-│   └── web/editor.html     元の SPD エディタ（spd-editor.html）の複製。sync-web.ps1 で上書きする
+│   │   └── OpenFontFolderHandler.java  メニュー「SPD → フォントのフォルダを開く」（web/fonts/ を開く）
+│   ├── web/editor.html     元の SPD エディタ（spd-editor.html）の複製。sync-web.ps1 で上書きする
+│   └── web/fonts/          PlemolJP HS v3.1.0（Regular のみ・SIL OFL 1.1）、spd-font.epf（Eclipse のフォント設定だけ）、README.txt（使い方）
 ├── spd.feature/            Feature（Marketplace 登録に必要）
 ├── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
 └── sync-web.ps1            元の SPD エディタから web/ へ複製するスクリプト
@@ -42,6 +44,15 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 - 元のリポジトリの運用：`spd-editor.html` は直下・`1-python`・`2-java`・`3-C` の4か所を同じ内容にする。
   画面右上の `ver. X.Y.Z` と仕様書 `spd-editor-spec.md` のバージョン・変更履歴を上げる。コミットメッセージ末尾に `(vX.Y.Z)`
 - 約束事（JS 側の関数）を変えるときは、元の `spd-editor.html` と `SpdBrowser.java` を同時に直す
+
+## フォント（2026-10-09 決定）
+
+- SPD の罫線は全角幅で表示するフォントが必要。SPD エディタの画面は同梱の `web/fonts/PlemolJPHS-Regular.ttf` を
+  `@font-face` で必ず使う（`local()` が先。元の spd-editor.html v1.19.1〜）。OS へのインストールは不要
+- Export した SPD が Java エディタ等でずれる人は、自分で OS にインストールし `spd-font.epf` を取り込む（README.txt の手順）
+- フォントの版は auto-setup-eclipse-2026 の `setup.ps1`（`$FontVersion`）とそろえる。
+  `spd-font.epf` はそのリポジトリの `font-color-compiler-java25.epf` から PlemolJP HS の行だけを抜き出し、
+  プロパティファイル用の2行も PlemolJP HS にしたもの
 
 ## Java ⇔ JavaScript の約束事（変更する場合は両側を同時に直す）
 
