@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="work.powercampus.spd.feature"
+      label="SPD Editor"
+      version="0.1.0.qualifier"
+      provider-name="powercampus.work">
+
+   <description>
+      SPD（構造化プログラム図）を作成・編集するためのエディタです。
+   </description>
+
+   <copyright>
+      Copyright (c) 2026 Takashi
+   </copyright>
+
+   <!-- TODO: 公開時のライセンス（EPL-2.0 / MIT など）を決めて書き換える -->
+   <license url="https://www.eclipse.org/legal/epl-2.0/">
+      TODO: ライセンス本文
+   </license>
+
+   <plugin
+         id="work.powercampus.spd.editor"
+         version="0.0.0"/>
+
+</feature>

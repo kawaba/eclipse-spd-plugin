@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="work.powercampus.spd.feature" version="0.0.0">
+      <category name="spd"/>
+   </feature>
+   <category-def name="spd" label="SPD Tools">
+      <description>SPD（構造化プログラム図）関連ツール</description>
+   </category-def>
+</site>

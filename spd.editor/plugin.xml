@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <!-- .spd ファイルをテキスト系のコンテンツタイプとして登録 -->
+   <extension point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            id="work.powercampus.spd.contentType"
+            name="SPD File"
+            base-type="org.eclipse.core.runtime.text"
+            file-extensions="spd"
+            default-charset="UTF-8"
+            priority="normal">
+      </content-type>
+   </extension>
+
+   <!-- SPDエディタ本体 -->
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="work.powercampus.spd.editor.SpdEditor"
+            name="SPD Editor"
+            class="work.powercampus.spd.editor.SpdEditor"
+            extensions="spd"
+            default="true">
+         <contentTypeBinding contentTypeId="work.powercampus.spd.contentType"/>
+      </editor>
+   </extension>
+
+</plugin>
