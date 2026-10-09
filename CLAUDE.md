@@ -21,8 +21,9 @@ spd-eclipse/
 │   ├── plugin.xml          .spd の関連付け、エディタ登録
 │   ├── src/work/powercampus/spd/editor/
 │   │   ├── Activator.java
-│   │   └── SpdEditor.java  Browser ウィジェットで web/editor.html を表示
-│   └── web/editor.html     ← 既存 SPD エディタに置き換える（今は仮の textarea）
+│   │   ├── SpdEditor.java  Browser ウィジェットで web/editor.html を表示
+│   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
+│   └── web/editor.html     既存 SPD エディタ（D:\★SPD\spd-editor\spd-editor.html）＋ Eclipse 連携
 ├── spd.feature/            Feature（Marketplace 登録に必要）
 └── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
 ```
@@ -43,11 +44,31 @@ spd-eclipse/
   保存や画面更新など JS を呼び返す可能性がある処理は `asyncExec` で JS 呼び出しの後に回す。
 - Java 側関数は存在チェックしてから呼ぶ（`typeof window.spdXxx === "function"`）。
   既存エディタを単体のブラウザでも動かせるようにしておくため。
-- `.spd` ファイルの中身は既存エディタの「保存」と同じ JSON（`{ "lang": ..., "data": { "x,y": "文字" } }`）。
+- `.spd` ファイルの形式は下の「.spd ファイル形式」を参照。
   `loadSpd` は空文字（新規ファイル）と、JSON でない SPD テキスト（Export 形式）も受け付ける。
 - Java は `web/editor.html?host=eclipse` で開く。JS 側はこれ（または BrowserFunction の有無）で
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
 - `web/spd-config.js`（既定の言語）と `web/spd-patterns.js`（スケルトン）は既存エディタの `2-java/` から複製したもの。
+
+## .spd ファイル形式（2026-10-09 決定）
+
+既存エディタの「保存」と同じ JSON を正式な形式とする（単体ブラウザ版の `.json` と相互に読み書きできる）。
+
+```json
+{
+  "lang": "java",
+  "data": {
+    "3,1": "│",
+    "3,2": "aa"
+  }
+}
+```
+
+- `lang`：`java` / `thymeleaf` / `python` / `c`（JS の `LANGS` と `SpdNewFileWizard.LANGS` を揃える）
+- `data`：キーは `"x,y"`（0 起点の列,行）、値はそのマスの文字（全角1文字、または半角2文字）。空マスは持たない
+- 文字コードは UTF-8。人が読む・Git で差分を見る・コード生成の入力にするテキスト形式は、
+  必要になったら「書き出し」として別に用意する（ファイル形式は変えない）
+- 形式を変えるときは、古いファイルも読めるようにする（`loadSpd` で判別する）
 
 ## 作業の進め方（推奨順）
 

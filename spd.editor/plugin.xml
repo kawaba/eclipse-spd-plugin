@@ -26,4 +26,29 @@
       </editor>
    </extension>
 
+   <!-- 新規 SPD ファイル作成ウィザード（ファイル → 新規 → その他 → SPD） -->
+   <extension point="org.eclipse.ui.newWizards">
+      <category
+            id="work.powercampus.spd.category"
+            name="SPD">
+      </category>
+      <wizard
+            id="work.powercampus.spd.editor.SpdNewFileWizard"
+            name="SPD ファイル"
+            category="work.powercampus.spd.category"
+            class="work.powercampus.spd.editor.SpdNewFileWizard">
+         <description>言語を選んで、新しい SPD ファイル（.spd）を作成します</description>
+      </wizard>
+   </extension>
+
+   <!-- Java・リソース パースペクティブでは「ファイル → 新規」に直接表示する -->
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <newWizardShortcut id="work.powercampus.spd.editor.SpdNewFileWizard"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <newWizardShortcut id="work.powercampus.spd.editor.SpdNewFileWizard"/>
+      </perspectiveExtension>
+   </extension>
+
 </plugin>
