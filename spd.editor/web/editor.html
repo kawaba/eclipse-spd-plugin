@@ -103,7 +103,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.18.0</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.19.0</span></h1>
   </div>
 </div>
 
@@ -140,7 +140,7 @@
 
 <script>
 /* ===== 実行環境 =====
-   Eclipse プラグイン（SpdEditor.java）から開かれたか。Java 側は URL に ?host=eclipse を付ける。
+   Eclipse プラグイン（kawaba/eclipse-spd-plugin の SpdBrowser.java）から開かれたか。Java 側は URL に ?host=eclipse を付ける。
    念のため Java の BrowserFunction が登録済みかどうかでも判定する。 */
 const IN_ECLIPSE = /[?&]host=eclipse(&|$)/.test(location.search)
                 || typeof window.spdGetInitialText === "function";
@@ -1793,7 +1793,7 @@ function clearAll(){
   updateInfo();
 }
 
-/* ===== Eclipse 連携（約束事は CLAUDE.md を参照。変更するときは SpdEditor.java も同時に直す） =====
+/* ===== Eclipse 連携（約束事は eclipse-spd-plugin の CLAUDE.md を参照。変更するときは SpdBrowser.java も同時に直す） =====
    Java → JS : loadSpd(text) ／ getSpdText()
    JS → Java : spdGetInitialText() ／ spdNotifyChanged() ／ spdRequestSave()
    .spd ファイルの中身は「保存」ボタンと同じ JSON（{ lang, data }）。

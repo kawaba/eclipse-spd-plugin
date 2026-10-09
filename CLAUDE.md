@@ -27,10 +27,21 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 │   │   │                   「保存…」で名前を付けて .spd に保存
 │   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（保存＝上書き、ダーティ表示）
 │   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
-│   └── web/editor.html     既存 SPD エディタ（D:\★SPD\spd-editor\spd-editor.html）＋ Eclipse 連携
+│   └── web/editor.html     元の SPD エディタ（spd-editor.html）の複製。sync-web.ps1 で上書きする
 ├── spd.feature/            Feature（Marketplace 登録に必要）
-└── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
+├── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
+└── sync-web.ps1            元の SPD エディタから web/ へ複製するスクリプト
 ```
+
+## 元の SPD エディタとの関係（二重管理しない）
+
+- 画面の本体は元リポジトリ（GitHub: kawaba/spd-editor、手元は `D:\★SPD\spd-editor`）の `spd-editor.html`。
+  Eclipse 連携（下の約束事の JS 側）も元に入っている（v1.19.0〜。仕様書 §6.13・§7.13e）。単体ブラウザでは何もしない作り
+- `web/editor.html`・`web/spd-config.js`・`web/spd-patterns.js` は**直接編集しない**。元を直してコミットし、
+  `powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` で複製する（`-Source` で元のフォルダを変えられる）
+- 元のリポジトリの運用：`spd-editor.html` は直下・`1-python`・`2-java`・`3-C` の4か所を同じ内容にする。
+  画面右上の `ver. X.Y.Z` と仕様書 `spd-editor-spec.md` のバージョン・変更履歴を上げる。コミットメッセージ末尾に `(vX.Y.Z)`
+- 約束事（JS 側の関数）を変えるときは、元の `spd-editor.html` と `SpdBrowser.java` を同時に直す
 
 ## Java ⇔ JavaScript の約束事（変更する場合は両側を同時に直す）
 
@@ -54,7 +65,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
   mode=view では「保存」ボタンを「保存…」（名前を付けて保存）と表示する。
 - Eclipse 2026 では未保存のエディタはタブ名に `*` が付かず、閉じるボタン × が ● になる（既定の設定）。
-- `web/spd-config.js`（既定の言語）と `web/spd-patterns.js`（スケルトン）は既存エディタの `2-java/` から複製したもの。
+- `web/spd-config.js`（既定の言語）と `web/spd-patterns.js`（スケルトン）は元のエディタの `2-java/` から `sync-web.ps1` で複製する。
 
 ## .spd ファイル形式（2026-10-09 決定）
 
@@ -78,7 +89,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 
 ## 作業の進め方（推奨順）
 
-1. `web/editor.html` を既存の SPD エディタに置き換え、上の約束事の関数を追加する
+1. `web/editor.html` を既存の SPD エディタに置き換え、上の約束事の関数を追加する（済。v1.19.0 で元へ取り込み、以後は複製）
 2. 開いて・編集して・保存できることを確認する（下の「動作確認」）
 3. 新規 `.spd` ファイル作成ウィザード（`org.eclipse.ui.newWizards`）
 4. コード生成機能（方式は未決定：ルールベース変換 / Copilot 連携 / Claude Code CLI 呼び出し）
