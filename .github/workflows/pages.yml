@@ -22,22 +22,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
           cache: maven
 
+      # Maven は手元と同じ版（.mvn/wrapper/maven-wrapper.properties）を使う。
+      # ランナーに入っている Maven では Tycho が内部エラーになったため
       - name: ビルド
-        run: mvn -B clean verify
+        run: |
+          chmod +x mvnw
+          ./mvnw -v
+          ./mvnw -B clean verify
 
       # p2 リポジトリの直下に、ブラウザで開いたときの説明ページを置く（Eclipse は無視する）
       - name: 説明ページを追加
         run: cp spd.site/pages/* spd.site/target/repository/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: spd.site/target/repository
 
