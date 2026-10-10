@@ -4,6 +4,6 @@
       <category name="spd"/>
    </feature>
    <category-def name="spd" label="SPD Tools">
-      <description>SPD（構造化プログラム図）関連ツール</description>
+      <description>Tools for SPD (Structured Programming Diagrams)</description>
    </category-def>
 </site>

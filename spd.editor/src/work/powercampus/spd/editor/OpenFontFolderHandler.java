@@ -8,6 +8,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.program.Program;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -35,8 +36,8 @@ public class OpenFontFolderHandler extends AbstractHandler {
             Activator.log(e);
         }
         MessageDialog.openError(HandlerUtil.getActiveShell(event), "SPD",
-                "フォントのフォルダを開けませんでした。"
-                + (path != null ? "\n次のフォルダを直接開いてください。\n" + path : ""));
+                Messages.OpenFontFolder_failed
+                + (path != null ? "\n" + NLS.bind(Messages.OpenFontFolder_openDirectly, path) : ""));
         return null;
     }
 }

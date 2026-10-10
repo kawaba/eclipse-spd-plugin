@@ -2,11 +2,13 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+   <!-- 表示する文言は plugin.properties（英語）・plugin_ja.properties（日本語）の %キー -->
+
    <!-- .spd ファイルをテキスト系のコンテンツタイプとして登録 -->
    <extension point="org.eclipse.core.contenttype.contentTypes">
       <content-type
             id="work.powercampus.spd.contentType"
-            name="SPD File"
+            name="%contentType.name"
             base-type="org.eclipse.core.runtime.text"
             file-extensions="spd"
             default-charset="UTF-8"
@@ -18,7 +20,7 @@
    <extension point="org.eclipse.ui.editors">
       <editor
             id="work.powercampus.spd.editor.SpdEditor"
-            name="SPD Editor"
+            name="%editor.name"
             icon="icons/spd.png"
             class="work.powercampus.spd.editor.SpdEditor"
             extensions="spd"
@@ -35,7 +37,7 @@
       </category>
       <view
             id="work.powercampus.spd.editor.SpdView"
-            name="SPD エディタ"
+            name="%view.name"
             icon="icons/spd.png"
             category="work.powercampus.spd.viewCategory"
             class="work.powercampus.spd.editor.SpdView"
@@ -51,11 +53,11 @@
       </category>
       <wizard
             id="work.powercampus.spd.editor.SpdNewFileWizard"
-            name="SPD ファイル"
+            name="%wizard.name"
             icon="icons/spd.png"
             category="work.powercampus.spd.category"
             class="work.powercampus.spd.editor.SpdNewFileWizard">
-         <description>言語を選んで、新しい SPD ファイル（.spd）を作成します</description>
+         <description>%wizard.description</description>
       </wizard>
    </extension>
 
@@ -63,8 +65,8 @@
    <extension point="org.eclipse.ui.commands">
       <command
             id="work.powercampus.spd.openFontFolder"
-            name="フォントのフォルダを開く"
-            description="SPD エディタ用フォント（PlemolJP HS）と Eclipse のフォント設定（spd-font.epf）のフォルダを開きます"
+            name="%command.openFontFolder.name"
+            description="%command.openFontFolder.description"
             defaultHandler="work.powercampus.spd.editor.OpenFontFolderHandler">
       </command>
    </extension>
@@ -75,7 +77,7 @@
          <menu id="work.powercampus.spd.menu" label="SPD">
             <command
                   commandId="org.eclipse.ui.views.showView"
-                  label="SPD エディタを開く"
+                  label="%menu.openView"
                   icon="icons/spd.png"
                   style="push">
                <parameter name="org.eclipse.ui.views.showView.viewId"
@@ -83,7 +85,7 @@
             </command>
             <command
                   commandId="org.eclipse.ui.newWizard"
-                  label="新規 SPD ファイル..."
+                  label="%menu.newFile"
                   style="push">
                <parameter name="newWizardId"
                      value="work.powercampus.spd.editor.SpdNewFileWizard"/>
@@ -91,7 +93,7 @@
             <separator name="font" visible="true"/>
             <command
                   commandId="work.powercampus.spd.openFontFolder"
-                  label="フォントのフォルダを開く"
+                  label="%menu.openFontFolder"
                   style="push">
             </command>
          </menu>
@@ -101,7 +103,7 @@
             <command
                   commandId="org.eclipse.ui.views.showView"
                   icon="icons/spd.png"
-                  tooltip="SPD エディタを開く"
+                  tooltip="%menu.openView"
                   style="push">
                <parameter name="org.eclipse.ui.views.showView.viewId"
                      value="work.powercampus.spd.editor.SpdView"/>

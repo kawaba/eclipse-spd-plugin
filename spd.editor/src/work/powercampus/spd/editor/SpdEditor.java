@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -35,7 +36,7 @@ public class SpdEditor extends EditorPart {
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
         if (!(input instanceof IFileEditorInput)) {
-            throw new PartInitException("SPDエディタはワークスペース内のファイルのみ開けます");
+            throw new PartInitException(Messages.SpdEditor_workspaceOnly);
         }
         setSite(site);
         setInput(input);
@@ -121,7 +122,7 @@ public class SpdEditor extends EditorPart {
         try (InputStream in = file.getContents()) {
             return new String(in.readAllBytes(), file.getCharset());
         } catch (CoreException | IOException e) {
-            throw new PartInitException("ファイルを読み込めません: " + file.getName(), e);
+            throw new PartInitException(NLS.bind(Messages.SpdEditor_cannotRead, file.getName()), e);
         }
     }
 }

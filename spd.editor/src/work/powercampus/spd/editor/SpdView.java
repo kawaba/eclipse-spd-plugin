@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -123,7 +124,7 @@ public class SpdView extends ViewPart {
             return;
         }
         SaveAsDialog dialog = new SaveAsDialog(getSite().getShell());
-        dialog.setTitle("SPD をファイルに保存");
+        dialog.setTitle(Messages.SpdView_saveTitle);
         IFile suggested = suggestFile();
         if (suggested != null) {
             dialog.setOriginalFile(suggested);
@@ -131,7 +132,7 @@ public class SpdView extends ViewPart {
             dialog.setOriginalName("spd.spd");
         }
         dialog.create();
-        dialog.setMessage("保存先のフォルダーとファイル名を指定してください（拡張子 .spd）");
+        dialog.setMessage(Messages.SpdView_saveMessage);
         if (dialog.open() != Window.OK || dialog.getResult() == null) {
             return;
         }
@@ -143,11 +144,11 @@ public class SpdView extends ViewPart {
         try {
             writeFile(file, text);
             getViewSite().getActionBars().getStatusLineManager()
-                    .setMessage("SPD を保存しました: " + file.getFullPath());
+                    .setMessage(NLS.bind(Messages.SpdView_saved, file.getFullPath()));
         } catch (CoreException e) {
             Activator.log(e);
-            MessageDialog.openError(getSite().getShell(), "SPD をファイルに保存",
-                    "保存できませんでした: " + e.getMessage());
+            MessageDialog.openError(getSite().getShell(), Messages.SpdView_saveTitle,
+                    NLS.bind(Messages.SpdView_saveFailed, e.getMessage()));
         }
     }
 

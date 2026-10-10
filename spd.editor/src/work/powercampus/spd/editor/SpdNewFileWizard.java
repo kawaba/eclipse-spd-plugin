@@ -40,7 +40,7 @@ public class SpdNewFileWizard extends BasicNewResourceWizard {
     @Override
     public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
         super.init(workbench, currentSelection);
-        setWindowTitle("新規 SPD ファイル");
+        setWindowTitle(Messages.SpdNewFileWizard_windowTitle);
         setNeedsProgressMonitor(true);
     }
 
@@ -101,8 +101,8 @@ public class SpdNewFileWizard extends BasicNewResourceWizard {
 
         NewFilePage(IStructuredSelection selection) {
             super("newSpdFile", selection);
-            setTitle("SPD ファイル");
-            setDescription("新しい SPD ファイルを作成します。保存先・ファイル名・言語を指定してください。");
+            setTitle(Messages.SpdNewFileWizard_pageTitle);
+            setDescription(Messages.SpdNewFileWizard_pageDescription);
             setFileExtension("spd");
         }
 
@@ -112,7 +112,7 @@ public class SpdNewFileWizard extends BasicNewResourceWizard {
             Composite control = (Composite) getControl();
 
             Group group = new Group(control, SWT.NONE);
-            group.setText("言語");
+            group.setText(Messages.SpdNewFileWizard_lang);
             group.setLayout(new GridLayout(LANGS.length, false));
             group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
             for (int i = 0; i < LANGS.length; i++) {

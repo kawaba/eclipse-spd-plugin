@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="work.powercampus.spd.feature"
-      label="SPD Editor"
+      label="%featureName"
       version="1.20.0.qualifier"
-      provider-name="powercampus.work">
+      provider-name="%providerName">
 
    <description>
-      SPD（構造化プログラム図）を作成・編集するためのエディタです。
+      %description
    </description>
 
    <copyright>
