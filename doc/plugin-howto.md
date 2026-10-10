@@ -31,7 +31,7 @@ Eclipse Marketplace（https://marketplace.eclipse.org/）は、プラグイン�
 - [ ] 同梱フォントのライセンス文 `web/fonts/LICENSE-PlemolJP.txt` が入っている（SIL OFL 1.1 の条件）
 - [ ] `feature.xml` の表示内容を見直す
   - `label`（SPD Editor）、`provider-name`（powercampus.work）、`<description>`、`<copyright>`
-  - インストール時の画面に表示される。`<copyright>` の名前の書き方（フルネームにするか等）もここで決める
+  - インストール時の画面に表示される。`<copyright>` は `Copyright (c) 2026 Takashi Kawaba`（2026-10-10 決定）
 - [ ] ライセンスが EPL-2.0 でそろっている（`LICENSE`・`feature.xml`・MANIFEST の `Bundle-License`）
 
 ### 1.2 動作確認
@@ -210,8 +210,7 @@ Marketplace に登録する前でも、この URL を学生に伝えれば同じ
 （そのときはワークフローで、過去の版を残したまま新しい版を足すように直す）
 
 -------------------------
-次の3点は確かめていないか、手順書の中で判断が必要です。
+次の2点は確かめていないか、手順書の中で判断が必要です。
 
 - Marketplace の画面の項目名：確かめておらず、変わることもあるため、手順書では「目安」と書いています。
-- feature.xml の <copyright>：今は Copyright (c) 2026 Takashi です。インストール時の画面に表示されるので、フルネームにするかどうかなどを公開前に決めてください。
 - 署名の警告：jar に署名していないので、インストール時に「署名されていないコンテンツ」の警告が出ます。インストールはできるので、授業用ならこのままでも使えます。
