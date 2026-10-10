@@ -55,6 +55,13 @@
   .toolrow{ display:flex; gap:4px; flex-wrap:wrap; }
   .toolrow-sep{ border-top:1px solid var(--line); margin-top:2px; padding-top:4px; }
   .toolrow-vsep{ width:1px; background:var(--line-strong); align-self:stretch; margin:0 2px; }
+  /* 流し込み表示（v1.20.0）：2段のどちらかが1行に収まらない幅では、段の枠をなくして
+     1段目の後ろに2段目のボタンを続けて流し込む（判定は updateToolFlow）。
+     段の区切りは横線の代わりに縦線（.toolrow-joint）で示す */
+  .tools.flow{ flex-direction:row; flex-wrap:wrap; }
+  .tools.flow .toolrow{ display:contents; }
+  .toolrow-joint{ display:none; }
+  .tools.flow .toolrow-joint{ display:block; }
   button.tool{
     height:28px; padding:0 6px; min-width:26px;
     font-family:var(--mono); font-size:14px; line-height:1; white-space:nowrap;
@@ -112,7 +119,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.19.1</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.20.0</span></h1>
   </div>
 </div>
 
@@ -318,6 +325,28 @@ function updateHelpLinks(){
 const toolbox = document.getElementById("toolbox");
 const langbar = document.getElementById("langbar");   // 言語切替ラジオ（タイトル行・左詰め）
 
+/* 流し込み表示の切り替え（v1.20.0）。各段を折り返さずに並べた幅（ボタン幅＋間隔の合計）と
+   ツールバーの内側の幅を比べ、どちらかの段が収まらなければ .flow を付ける。
+   ボタン幅は表示方式で変わらないので、.flow の付け外しで判定が揺れることはない */
+function updateToolFlow(){
+  const avail = toolbox.parentElement.clientWidth
+              - parseFloat(getComputedStyle(toolbox.parentElement).paddingLeft)
+              - parseFloat(getComputedStyle(toolbox.parentElement).paddingRight);
+  const gap = 4;   // .toolrow の gap
+  const tooWide = [...toolbox.children].some(row => {
+    let w = 0, n = 0;
+    for (const el of row.children){
+      if (el.classList.contains("toolrow-joint")) continue;
+      const cs = getComputedStyle(el);
+      w += el.getBoundingClientRect().width + parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
+      n++;
+    }
+    return w + gap * Math.max(0, n - 1) > avail + 0.5;
+  });
+  toolbox.classList.toggle("flow", tooWide);
+}
+new ResizeObserver(() => updateToolFlow()).observe(document.querySelector(".toolbar"));
+
 function renderToolbox(){
   const symbols = currentLang === "python" ? PYTHON_SYMBOLS
                : currentLang === "c"      ? C_SYMBOLS
@@ -372,6 +401,12 @@ function renderToolbox(){
   ].forEach((items, i) => {
     const row = document.createElement("div");
     row.className = "toolrow" + (i === 1 ? " toolrow-sep" : "");
+    if (i === 1){
+      // 流し込み表示のときだけ見える、1段目と2段目の境目の縦線
+      const joint = makeBtn("|");
+      joint.classList.add("toolrow-joint");
+      row.appendChild(joint);
+    }
     items.forEach(id => row.appendChild(makeBtn(id)));
     if (i === 1){
       // クリア・Export・Import の右に [保存][開く] を横並びで配置
@@ -394,6 +429,7 @@ function renderToolbox(){
     }
     toolbox.appendChild(row);
   });
+  updateToolFlow();
 
   // 言語切替ラジオ（Java / Thymeleaf / Python / C）はタイトル行（langbar・左詰め）に配置
   langbar.innerHTML = "";
