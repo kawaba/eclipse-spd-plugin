@@ -92,45 +92,42 @@ git commit -am "開発用のバージョンを 0.2.0-SNAPSHOT にする"
 
 ## 3. アップデートサイトを公開する（GitHub Pages）
 
-ソース（`main` ブランチ）と公開用のファイルを混ぜないように、**`gh-pages` ブランチ**を公開専用にします。
-
-### 3.1 初回だけ：gh-pages ブランチを作る
-
-```powershell
-# リポジトリの直下で。main とは別のフォルダ（..\spd-site）に gh-pages を取り出す
-git worktree add --orphan -b gh-pages ..\spd-site
-```
-
-> `--orphan` が使えない古い Git の場合は、GitHub の画面で空の `gh-pages` ブランチを作ってから
-> `git worktree add ..\spd-site gh-pages` とする。
-
-### 3.2 ビルド結果をコピーして push する（公開のたびに行う）
-
-```powershell
-# 古い中身を消してから、新しいビルド結果をコピーする（.git は残す）
-Get-ChildItem ..\spd-site -Exclude .git | Remove-Item -Recurse -Force
-Copy-Item spd.site\target\repository\* ..\spd-site -Recurse
-# GitHub Pages の Jekyll 処理を止める（ファイルがそのまま配信されるように）
-New-Item -ItemType File ..\spd-site\.nojekyll -Force | Out-Null
-
-git -C ..\spd-site add -A
-git -C ..\spd-site commit -m "アップデートサイト 0.1.0"
-git -C ..\spd-site push origin gh-pages
-```
-
-### 3.3 初回だけ：GitHub Pages を有効にする
-
-1. GitHub のリポジトリ → **Settings → Pages**
-2. Source を「Deploy from a branch」、Branch を `gh-pages` / `/(root)` にして保存
-3. 数分後、次の URL が使えるようになる
+公開は GitHub Actions（`.github/workflows/pages.yml`）が自動で行います。
+**`v` で始まるタグを push すると**、GitHub 上で `mvn clean verify` が走り、
+`spd.site/target/repository/` に説明ページ `spd.site/pages/index.html` を加えたものが次の URL に公開されます。
 
 ```
 https://kawaba.github.io/eclipse-spd-plugin/
 ```
 
+Marketplace に登録する前でも、この URL を学生に伝えれば同じようにインストール・更新できます
+（URL を知っていれば誰でも見られるが、どこにも載せなければ見つかることはまずない）。
+
+### 3.1 初回だけ：GitHub Pages を有効にする
+
+次のどちらかで、公開方式を「GitHub Actions」にします（有効にしただけでは何も公開されない）。
+
+- 画面で：リポジトリ → **Settings → Pages** → 「Build and deployment」の Source を **GitHub Actions** にする
+- コマンドで：`gh api -X POST repos/kawaba/eclipse-spd-plugin/pages -f build_type=workflow`
+
+### 3.2 公開する（公開のたびに行う）
+
+2.3 でタグを push すると、自動で始まります。タグを付けずに今の `main` を公開し直したいときは、
+リポジトリの **Actions → 「アップデートサイトを公開」→ Run workflow** で手動実行します
+（コマンドなら `gh workflow run pages.yml`）。
+
+進み具合は Actions の画面か `gh run watch` で確認します。失敗したときは、その実行のログを見ます。
+
+### 3.3 インストール時に更新先が登録される
+
+`spd.feature/p2.inf` により、SPD Editor をインストールすると、上の URL が
+「使用可能なソフトウェア・サイト」に自動で登録されます。ローカルのフォルダや zip から入れた人にも、
+「ヘルプ → 更新の確認」で新しい版が届きます。
+
 ### 3.4 公開した URL で確認する
 
-ブラウザで `https://kawaba.github.io/eclipse-spd-plugin/p2.index` が表示されることを確かめてから、
+ブラウザで `https://kawaba.github.io/eclipse-spd-plugin/` を開いて説明ページが出ることと、
+`https://kawaba.github.io/eclipse-spd-plugin/p2.index` が表示されることを確かめてから、
 **別の（プラグインを入れていない）Eclipse** で次を確認します。
 
 1. 「ヘルプ → 新規ソフトウェアのインストール → 追加」で、上の URL を「ロケーション」に入れる
@@ -138,6 +135,7 @@ https://kawaba.github.io/eclipse-spd-plugin/
 3. 途中で「署名されていないコンテンツ」の警告が出る（下の「補足：署名」参照）。「とにかくインストール」で進める
 
 > この URL は Marketplace に登録したあとも変えないこと。変えると、インストール済みの人が更新を受け取れなくなる。
+> どうしても変えるときは、`spd.feature/p2.inf`・`spd.site/pages/index.html`・この手順書の URL をそろえて直す。
 
 ---
 
@@ -184,9 +182,8 @@ https://kawaba.github.io/eclipse-spd-plugin/
 
 1. 元の SPD エディタを直した場合は `sync-web.ps1` で複製する
 2. バージョンを上げる（2.1。必ず前回より大きく）
-3. `mvn clean verify` → コミット・タグ（2.2〜2.3）
-4. `gh-pages` に新しいビルド結果をコピーして push（3.2）
-5. Marketplace の掲載ページを編集し、Version と変更内容を更新する（Update Site URL・Feature ID は変えない）
+3. `mvn clean verify` → コミット・タグを push（2.2〜2.3）。タグの push で自動的に公開される（3.2）
+4. Marketplace の掲載ページを編集し、Version と変更内容を更新する（Update Site URL・Feature ID は変えない）
 
 利用者の Eclipse では「ヘルプ → 更新の確認」で新しいバージョンが入ります。
 （開発機のように更新の確認が効かない環境では、いったんアンインストールして入れ直す）
@@ -207,14 +204,10 @@ https://kawaba.github.io/eclipse-spd-plugin/
 
 ### 古いバージョンも残したい場合
 
-3.2 の手順は毎回中身を入れ替えるので、アップデートサイトには最新版だけが残ります。
-古いバージョンも選べるようにしたい場合は、`gh-pages` に `0.1.0/`・`0.2.0/` のようにフォルダを分けて置き、
+公開のたびに中身を丸ごと入れ替えるので、アップデートサイトには最新版だけが残ります。
+古いバージョンも選べるようにしたい場合は、`0.1.0/`・`0.2.0/` のようにフォルダを分けて置き、
 直下に「コンポジットリポジトリ」（`compositeContent.xml`・`compositeArtifacts.xml`）を作って、それらをまとめます。
-
-### 公開を自動にしたい場合
-
-GitHub Actions で「タグを push したら `mvn clean verify` して `gh-pages` に置く」ようにできます。
-手作業の公開に慣れてから検討すれば十分です。
+（そのときはワークフローで、過去の版を残したまま新しい版を足すように直す）
 
 -------------------------
 次の3点は確かめていないか、手順書の中で判断が必要です。

@@ -1,0 +1,52 @@
+# タグ（v0.1.0 など）を push したら、ビルドして GitHub Pages にアップデートサイトを公開する。
+# Actions の画面から手で実行することもできる（workflow_dispatch）。
+# 公開先: https://kawaba.github.io/eclipse-spd-plugin/
+name: アップデートサイトを公開
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 公開が重なったら、後から始めたものを待たせる（途中で止めない）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: ビルド
+        run: mvn -B clean verify
+
+      # p2 リポジトリの直下に、ブラウザで開いたときの説明ページを置く（Eclipse は無視する）
+      - name: 説明ページを追加
+        run: cp spd.site/pages/* spd.site/target/repository/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: spd.site/target/repository
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

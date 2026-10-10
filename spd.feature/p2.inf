@@ -1,0 +1,6 @@
+# インストールしたときに、更新先（GitHub Pages のアップデートサイト）を Eclipse に登録する。
+# ローカルのフォルダや zip から入れた人にも「ヘルプ → 更新の確認」で新しい版が届くようにするため。
+# URL を変えるときは doc/plugin-howto.md と spd.site/pages/index.html も直す（: は ${#58} と書く）
+instructions.configure=\
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:0,location:https${#58}//kawaba.github.io/eclipse-spd-plugin/,name:SPD Editor);\
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(type:1,location:https${#58}//kawaba.github.io/eclipse-spd-plugin/,name:SPD Editor);

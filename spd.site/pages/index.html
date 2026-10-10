@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPD Editor for Eclipse</title>
+<!-- アップデートサイト（p2 リポジトリ）の直下に置く説明ページ。Eclipse はこのファイルを読まない。
+     公開は .github/workflows/pages.yml が行う。外部の CSS・JS は使わない -->
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1f2328; --muted:#59636e; --line:#d1d9e0;
+    --box:#f6f8fa; --accent:#0969da; --warn-bg:#fff8c5; --warn-line:#d4a72c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#3d444d;
+      --box:#151b23; --accent:#4493f8; --warn-bg:#272115; --warn-line:#9e6a03;
+    }
+  }
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:system-ui, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+    line-height:1.7;
+  }
+  main{ max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1{ font-size:1.6rem; margin:0 0 4px; }
+  h2{ font-size:1.2rem; margin:32px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--line); }
+  .lead{ color:var(--muted); margin:0 0 16px; }
+  .url{
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    background:var(--box); border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+  }
+  .url code{ font-size:1rem; word-break:break-all; flex:1 1 auto; }
+  button{
+    font:inherit; font-size:.9rem; padding:4px 12px; cursor:pointer;
+    border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg);
+  }
+  ol li, ul li{ margin:4px 0; }
+  .note{
+    background:var(--warn-bg); border-left:4px solid var(--warn-line);
+    padding:8px 12px; border-radius:4px; margin:12px 0;
+  }
+  a{ color:var(--accent); }
+  kbd, .menu{
+    font-family:inherit; background:var(--box); border:1px solid var(--line);
+    border-radius:4px; padding:0 4px; white-space:nowrap;
+  }
+  footer{ margin-top:40px; color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>SPD Editor for Eclipse</h1>
+  <p class="lead">SPD（構造化プログラム図）を Eclipse の中で描くためのプラグインです。</p>
+
+  <h2>アップデートサイトの URL</h2>
+  <div class="url">
+    <code id="siteUrl">https://kawaba.github.io/eclipse-spd-plugin/</code>
+    <button type="button" id="copy">コピー</button>
+  </div>
+
+  <h2>インストール</h2>
+  <ol>
+    <li>Eclipse のメニュー <span class="menu">ヘルプ → 新規ソフトウェアのインストール</span> を開く</li>
+    <li><span class="menu">追加…</span> を押し、「ロケーション」に上の URL を貼り付けて <span class="menu">追加</span>（名前は空でよい）</li>
+    <li>一覧の「SPD Tools」の下にある <strong>SPD Editor</strong> にチェックを入れて <span class="menu">次へ</span></li>
+    <li>使用条件（EPL-2.0）に同意して <span class="menu">完了</span></li>
+    <li>途中で確認の画面が出たら、下の「署名について」を読んで進める</li>
+    <li>Eclipse の再起動を求められたら <span class="menu">今すぐ再起動</span></li>
+  </ol>
+  <div class="note">
+    <strong>署名について：</strong>このプラグインには電子署名を付けていないため、
+    「署名されていないコンテンツ」などの確認画面が出ます。
+    <span class="menu">とにかくインストール</span>（または「信頼する」）を選んで進めてください。
+  </div>
+
+  <h2>使い方</h2>
+  <ul>
+    <li>メニュー <span class="menu">SPD → SPD エディタを開く</span> またはツールバーのボタンで <strong>SPD エディタ</strong>の画面が開きます。
+        描いた内容は自動で保管され、<span class="menu">保存…</span> で <code>.spd</code> ファイルに保存できます</li>
+    <li><span class="menu">SPD → 新規 SPD ファイル...</span> で <code>.spd</code> ファイルを作ると、エディタで開いて
+        <kbd>Ctrl</kbd>+<kbd>S</kbd> で上書き保存できます</li>
+    <li>Export した SPD を Java のエディタなどに貼ると罫線がずれる場合は、
+        <span class="menu">SPD → フォントのフォルダを開く</span> の中の README.txt を見てください</li>
+  </ul>
+
+  <h2>更新</h2>
+  <p><span class="menu">ヘルプ → 更新の確認</span> で新しい版が入ります。
+     うまくいかないときは、<span class="menu">ヘルプ → Eclipse について → インストール詳細</span> で
+     SPD Editor をアンインストールしてから、もう一度インストールしてください。</p>
+
+  <h2>動作環境</h2>
+  <ul>
+    <li>Eclipse 2025-09 以降（授業では Eclipse 2026 で確認しています）</li>
+    <li>Java 17 以上</li>
+  </ul>
+
+  <footer>
+    ソースコード・問い合わせ：<a href="https://github.com/kawaba/eclipse-spd-plugin">github.com/kawaba/eclipse-spd-plugin</a>
+    ／ ライセンス：EPL-2.0（同梱フォント PlemolJP HS は SIL OFL 1.1）
+  </footer>
+</main>
+<script>
+  // URL をクリップボードにコピーする（使えない環境ではボタンを隠す）
+  (function(){
+    var btn = document.getElementById("copy");
+    if (!navigator.clipboard){ btn.hidden = true; return; }
+    btn.addEventListener("click", function(){
+      navigator.clipboard.writeText(document.getElementById("siteUrl").textContent).then(function(){
+        btn.textContent = "コピーしました";
+        setTimeout(function(){ btn.textContent = "コピー"; }, 2000);
+      });
+    });
+  })();
+</script>
+</body>
+</html>

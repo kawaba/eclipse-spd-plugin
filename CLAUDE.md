@@ -30,8 +30,11 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 │   │   └── OpenFontFolderHandler.java  メニュー「SPD → フォントのフォルダを開く」（web/fonts/ を開く）
 │   ├── web/editor.html     元の SPD エディタ（spd-editor.html）の複製。sync-web.ps1 で上書きする
 │   └── web/fonts/          PlemolJP HS v3.1.0（Regular のみ・SIL OFL 1.1）、spd-font.epf（Eclipse のフォント設定だけ）、README.txt（使い方）
-├── spd.feature/            Feature（Marketplace 登録に必要）
+├── spd.feature/            Feature（Marketplace 登録に必要）。p2.inf でインストール時に更新先 URL を登録する
 ├── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
+│   └── pages/index.html    公開サイトの直下に置く学生向けの説明ページ
+├── .github/workflows/pages.yml  タグ v* の push で GitHub Pages（https://kawaba.github.io/eclipse-spd-plugin/）に公開
+├── doc/plugin-howto.md     公開（GitHub Pages・Marketplace）の手順書
 └── sync-web.ps1            元の SPD エディタから web/ へ複製するスクリプト
 ```
 
