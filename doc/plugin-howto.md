@@ -108,6 +108,12 @@ Marketplace に登録する前でも、この URL を学生に伝えれば同じ
 - 画面で：リポジトリ → **Settings → Pages** → 「Build and deployment」の Source を **GitHub Actions** にする
 - コマンドで：`gh api -X POST repos/kawaba/eclipse-spd-plugin/pages -f build_type=workflow`
 
+続けて、タグからの公開を許します（初期設定では `main` からしか公開できず、タグの公開が
+「environment protection rules」で拒否される）。
+
+- 画面で：**Settings → Environments → github-pages** の「Deployment branches and tags」に、種類 Tag・名前 `v*` を追加
+- コマンドで：`gh api -X POST repos/kawaba/eclipse-spd-plugin/environments/github-pages/deployment-branch-policies -f name='v*' -f type=tag`
+
 ### 3.2 公開する（公開のたびに行う）
 
 2.3 でタグを push すると、自動で始まります。タグを付けずに今の `main` を公開し直したいときは、
