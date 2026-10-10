@@ -43,7 +43,8 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 - 画面の本体は元リポジトリ（GitHub: kawaba/spd-editor、手元は `D:\★SPD\spd-editor`）の `spd-editor.html`。
   Eclipse 連携（下の約束事の JS 側）も元に入っている（v1.19.0〜。仕様書 §6.13・§7.13e）。単体ブラウザでは何もしない作り
 - `web/editor.html`・`web/spd-config.js`・`web/spd-patterns.js` は**直接編集しない**。元を直してコミットし、
-  `powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` で複製する（`-Source` で元のフォルダを変えられる）
+  `powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` で複製する（`-Source` で元のフォルダを変えられる）。
+  このときプラグインの版も SPD エディタの版にそろう
 - 元のリポジトリの運用：`spd-editor.html` は直下・`1-python`・`2-java`・`3-C` の4か所を同じ内容にする。
   画面右上の `ver. X.Y.Z` と仕様書 `spd-editor-spec.md` のバージョン・変更履歴を上げる。コミットメッセージ末尾に `(vX.Y.Z)`
 - 約束事（JS 側の関数）を変えるときは、元の `spd-editor.html` と `SpdBrowser.java` を同時に直す
@@ -134,5 +135,8 @@ mvn clean verify
 - Browser のエンジンは OS ごとに違う（Windows: Edge/WebView2、mac: WebKit、Linux: WebKitGTK）。
   新しい JS 構文を使う場合は 3 環境で動くか確認する。
 - `Eclipse-BundleShape: dir` を外さない（外すと web/ 内の CSS・JS が読めなくなる）。
-- `Bundle-Version` と `feature.xml` の version、各 `pom.xml` のバージョンは揃えて上げる
-  （`mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.2.0-SNAPSHOT` で一括変更できる）。
+- プラグインの版は SPD エディタの版（画面右上の `ver. X.Y.Z`）と同じにする（2026-10-10 決定）。
+  `sync-web.ps1` が pom（`X.Y.Z-SNAPSHOT`）・MANIFEST と feature.xml（`X.Y.Z.qualifier`）をそろえるので、手で変えない。
+  `-SNAPSHOT` は外さずに公開する（qualifier＝ビルド日時が付き、Java 側だけ直したときも更新が届く）。
+  公開はタグ `vX.Y.Z` の push（Java 側だけ直して出し直すときは `vX.Y.Z-2` など）。手順は `doc/plugin-howto.md`
+- ビルドは `mvn` でも `.\mvnw.cmd`（Maven 3.9.11 に固定。GitHub Actions もこれを使う）でもよい

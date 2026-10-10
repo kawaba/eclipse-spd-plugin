@@ -53,15 +53,18 @@ Marketplace には「対応する Eclipse のバージョン」を書く欄が�
 
 ### 2.1 バージョンを決める
 
-開発中は `0.1.0-SNAPSHOT` ですが、公開するものは `-SNAPSHOT` を外したバージョンにします。
+**プラグインの版は、SPD エディタの画面右上の版（`ver. X.Y.Z`）と同じにします**（2026-10-10 決定）。
+手で変える必要はなく、`sync-web.ps1` が複製のあとに pom・MANIFEST・feature.xml の版をそろえます。
 
 ```powershell
-# リポジトリの直下で（MANIFEST・feature.xml・各 pom.xml がまとめて変わる）
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.1.0
+powershell -ExecutionPolicy Bypass -File .\sync-web.ps1
+# 例：SPD エディタ ver. 1.20.0 / プラグインの版  0.1.0-SNAPSHOT → 1.20.0-SNAPSHOT
 ```
 
-- `Bundle-Version: 0.1.0.qualifier` の `qualifier` は、ビルド時に日時（例：`0.1.0.202610091230`）に置き換わる
-- 2 回目以降の公開では、必ず前回より大きいバージョンにする（同じだと利用者の Eclipse が更新を見つけない）
+- pom は `1.20.0-SNAPSHOT`、MANIFEST・feature.xml は `1.20.0.qualifier` のまま公開してよい
+  （Tycho の決まりで、`-SNAPSHOT` を外すと `qualifier` も付かなくなる）
+- `qualifier` はビルド時に日時（例：`1.20.0.202610101830`）に置き換わる。
+  Java 側だけを直して版が変わらないときも、新しいビルドのほうが大きくなるので利用者に更新が届く
 
 ### 2.2 ビルド
 
@@ -74,18 +77,13 @@ mvn clean verify
 
 ### 2.3 コミットとタグ
 
+タグは `v` ＋ SPD エディタの版にします。Java 側だけを直して出し直すときは、`-2`・`-3` と枝番を付けます。
+
 ```powershell
 git add -A
-git commit -m "バージョン 0.1.0 を公開する"
-git tag v0.1.0
-git push origin main --tags
-```
-
-公開が終わったら、次の開発用に `-SNAPSHOT` へ戻しておきます。
-
-```powershell
-mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=0.2.0-SNAPSHOT
-git commit -am "開発用のバージョンを 0.2.0-SNAPSHOT にする"
+git commit -m "SPD エディタ v1.20.0 で公開する"
+git tag v1.20.0          # Java 側だけ直して出し直すときは v1.20.0-2 など
+git push origin main v1.20.0
 ```
 
 ---
@@ -163,7 +161,7 @@ Marketplace に登録する前でも、この URL を学生に伝えれば同じ
 | Website / Source / Support | `https://github.com/kawaba/eclipse-spd-plugin`（問い合わせ先は Issues） |
 | **Update Site URL** | `https://kawaba.github.io/eclipse-spd-plugin/` |
 | **Feature ID** | `work.powercampus.spd.feature`（`feature.xml` の `id`。Marketplace はこの ID を使ってインストールする） |
-| Version | `0.1.0` |
+| Version | `1.20.0`（SPD エディタの版） |
 | Supported Eclipse versions | 1.2 で確認したリリース（例：2025-09 以降） |
 | Supported platforms | 確認した OS（Windows など） |
 | Java version | 17 以上 |
@@ -180,10 +178,9 @@ Marketplace に登録する前でも、この URL を学生に伝えれば同じ
 
 ## 5. 2 回目以降の更新
 
-1. 元の SPD エディタを直した場合は `sync-web.ps1` で複製する
-2. バージョンを上げる（2.1。必ず前回より大きく）
-3. `mvn clean verify` → コミット・タグを push（2.2〜2.3）。タグの push で自動的に公開される（3.2）
-4. Marketplace の掲載ページを編集し、Version と変更内容を更新する（Update Site URL・Feature ID は変えない）
+1. 元の SPD エディタを直した場合は `sync-web.ps1` で複製する（プラグインの版もそろう。2.1）
+2. `mvn clean verify` → コミット・タグを push（2.2〜2.3）。タグの push で自動的に公開される（3.2）
+3. Marketplace の掲載ページを編集し、Version と変更内容を更新する（Update Site URL・Feature ID は変えない）
 
 利用者の Eclipse では「ヘルプ → 更新の確認」で新しいバージョンが入ります。
 （開発機のように更新の確認が効かない環境では、いったんアンインストールして入れ直す）
@@ -205,7 +202,7 @@ Marketplace に登録する前でも、この URL を学生に伝えれば同じ
 ### 古いバージョンも残したい場合
 
 公開のたびに中身を丸ごと入れ替えるので、アップデートサイトには最新版だけが残ります。
-古いバージョンも選べるようにしたい場合は、`0.1.0/`・`0.2.0/` のようにフォルダを分けて置き、
+古いバージョンも選べるようにしたい場合は、`1.20.0/`・`1.21.0/` のようにフォルダを分けて置き、
 直下に「コンポジットリポジトリ」（`compositeContent.xml`・`compositeArtifacts.xml`）を作って、それらをまとめます。
 （そのときはワークフローで、過去の版を残したまま新しい版を足すように直す）
 
