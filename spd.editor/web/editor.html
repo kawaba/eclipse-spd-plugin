@@ -119,7 +119,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.21.1</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.21.2</span></h1>
   </div>
 </div>
 
@@ -1465,12 +1465,22 @@ function pasteBlock(cells, width, height, ox, oy){
   }
 }
 
+/* クリップボードの文字列を読む（Promise）。Eclipse 内では Java の spdGetClipboardText() で読む（EC-07）。
+   WebView2 では navigator.clipboard.readText() が許可しても読めないことがあるため */
+function readClipboardText(){
+  if (typeof window.spdGetClipboardText === "function"){
+    try { return Promise.resolve(window.spdGetClipboardText() || ""); }
+    catch (e) { return Promise.reject(e); }
+  }
+  return navigator.clipboard.readText();
+}
+
 function doPaste(partial){
   if (partial && !caret){
     infoEl.textContent = "貼り付け先のマスをクリックしてから Shift+Import してください";
     return;
   }
-  navigator.clipboard.readText().then(text => {
+  readClipboardText().then(text => {
     if (!text) return;
     const sc = stripCommentMarks(text);   // 囲み記号・行頭の # を取り除く（EI-14）
     const { cells, width, height } = parseSPDText(sc.text);
@@ -1491,7 +1501,7 @@ function doPaste(partial){
     renderToolbox();
     updateInfo();
     if (sc.stripped) infoEl.textContent = "コメント記号を取り除いてインポートしました";
-  }).catch(() => {});
+  }).catch(() => { infoEl.textContent = "クリップボードを読み取れませんでした"; });
 }
 
 /* ===== スケルトン（SK-01〜05・v1.18.0） =====
@@ -1980,7 +1990,7 @@ function clearAll(){
 
 /* ===== Eclipse 連携（約束事は eclipse-spd-plugin の CLAUDE.md を参照。変更するときは SpdBrowser.java も同時に直す） =====
    Java → JS : loadSpd(text) ／ getSpdText()
-   JS → Java : spdGetInitialText() ／ spdNotifyChanged() ／ spdRequestSave()
+   JS → Java : spdGetInitialText() ／ spdNotifyChanged() ／ spdRequestSave() ／ spdGetClipboardText()（Import）
    .spd ファイルの中身は「保存」ボタンと同じ JSON（{ lang, data }）。
    Java 側関数は存在チェックしてから呼ぶ（単体のブラウザでもそのまま動くように）。 */
 function setupEclipseBridge(){

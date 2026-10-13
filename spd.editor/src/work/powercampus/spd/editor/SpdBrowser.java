@@ -9,6 +9,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.ProgressListener;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -16,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
  * Java と JavaScript の約束事（詳細は CLAUDE.md）の Java 側。SpdEditor と SpdView で共用する。
  *
  *   Java → JS : loadSpd(text) / getSpdText()
- *   JS → Java : spdGetInitialText() / spdNotifyChanged() / spdRequestSave()
+ *   JS → Java : spdGetInitialText() / spdNotifyChanged() / spdRequestSave() / spdGetClipboardText()
  */
 class SpdBrowser {
 
@@ -81,6 +83,20 @@ class SpdBrowser {
             public Object function(Object[] args) {
                 runAfterCallback(host::saveRequested);
                 return null;
+            }
+        };
+        // Import 用のクリップボード読み取り。WebView2 では navigator.clipboard.readText() が
+        // 許可しても読めないことがあるため、SWT のクリップボードから読んで渡す
+        new BrowserFunction(browser, "spdGetClipboardText") {
+            @Override
+            public Object function(Object[] args) {
+                Clipboard clipboard = new Clipboard(browser.getDisplay());
+                try {
+                    Object text = clipboard.getContents(TextTransfer.getInstance());
+                    return text instanceof String ? text : "";
+                } finally {
+                    clipboard.dispose();
+                }
             }
         };
     }

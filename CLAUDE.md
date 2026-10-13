@@ -67,6 +67,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 | JS → Java | `spdGetInitialText()` | ファイル内容を取得する（Java の BrowserFunction） |
 | JS → Java | `spdNotifyChanged()` | 編集されたら呼ぶ（エディタ：未保存表示。ビュー：自動保管） |
 | JS → Java | `spdRequestSave()` | Ctrl+S・「保存」ボタン（エディタ：上書き保存。ビュー：名前を付けて保存） |
+| JS → Java | `spdGetClipboardText()` | Import 用にクリップボードの文字列を返す（WebView2 では `navigator.clipboard.readText()` が許可しても読めないため。v1.21.2〜） |
 
 - Java から JS へ文字列を渡すときは、`execute("f('" + text + "')")` のような文字列連結をしない。
   エスケープ漏れを避けるため、JS 側から BrowserFunction で取得させる。
