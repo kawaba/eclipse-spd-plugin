@@ -119,7 +119,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.20.0</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.21.0</span></h1>
   </div>
 </div>
 
@@ -131,7 +131,7 @@
 
 <div class="inputrow">
   <span>文字入力欄</span>
-  <input id="cap" type="text" placeholder="ここで文字列を編集し、Enterでカーソル位置へ反映（日本語可）" autocomplete="off" spellcheck="false">
+  <input id="cap" type="text" placeholder="ここで文字列を編集し、Enterでカーソル位置へ挿入・Shift+Enterで上書き（日本語可）" autocomplete="off" spellcheck="false">
 </div>
 
 <div class="scroll" id="scroll">
@@ -228,7 +228,30 @@ const C_SYMBOLS = [
   "◇─","└─else","↻─for:","↻─while:",
   "break","continue","◇─switch:","├─case","└─default"
 ];
-/* 罫線記号グループ（2段目の左側に配置）。Java / Thymeleaf / C は ┬・┴ を右端に追加 */
+/* Thymeleaf 用シンボル（v1.21.0）。画面の部品を ［］ で示すラベル。罫線は付けない */
+const THYMELEAF_SYMBOLS = [
+  "［見出し］","［小見出し］","［文字］","［段落］","［フォーム］","［リンク］",
+  "［表（行）］","［表（列）］","［画像］"
+];
+const THYMELEAF_TITLES = {
+  "［見出し］":   "見出し（h1・h2 など、ページの表題）",
+  "［小見出し］": "小見出し（h3〜h6 など、区画の表題）",
+  "［文字］":     "文字（span など、文中の短い文字列や値の表示）",
+  "［段落］":     "段落（p。ひとまとまりの文章）",
+  "［フォーム］": "フォーム（form。入力内容を送信する。送信先は → で示す）",
+  "［リンク］":   "リンク（a。別のページへ移動する。移動先は → で示す）",
+  "［表（行）］": "表（行）（1行に1項目を並べる表。ラベルと値の組を縦に並べる）",
+  "［表（列）］": "表（列）（1列に1項目を並べる一覧表。データの件数だけ行を繰り返す）",
+  "［画像］":     "画像（img）"
+};
+/* 括弧記号（Thymeleaf・v1.21.0）。配置後のカーソルは括弧の中央に置く（追記しやすいように） */
+const BRACKET_SYMBOLS = ["＜＞","{}","<<>>"];
+const BRACKET_TITLES = {
+  "＜＞":  "＜＞（部品の種類。例：送信＜submit＞）",
+  "{}":   "{}（変数・式。例：{変数}）",
+  "<<>>": "<<>>（画像サイズ・CSS の指定）"
+};
+/* 罫線記号グループ（2段目の左側に配置）。Java / C は ┬・┴ を右端に追加 */
 const LINE_SYMBOLS = ["│","─","└─","├─","┬─"];
 const LINE_SYMBOLS_JAVA = ["│","─","└─","├─","┬─","┬","┴"];
 /* 矢印記号グループ（2段目、罫線グループの右に配置）。
@@ -236,7 +259,9 @@ const LINE_SYMBOLS_JAVA = ["│","─","└─","├─","┬─","┬","┴"];
 const ARROW_SYMBOLS_JAVA   = ["←","→","⇒","─⊳","---⊳"];
 const ARROW_SYMBOLS_PYTHON = ["←","->"];
 const ARROW_SYMBOLS_C      = ["←"];
-/* 言語モード（ラジオの並び順）。thymeleaf のツールバーは当面 java と同じ（Export の囲みだけが異なる） */
+/* Thymeleaf は罫線グループと区切らずに → と括弧記号を続ける（v1.21.0） */
+const ARROW_SYMBOLS_THYMELEAF = ["→", ...BRACKET_SYMBOLS];
+/* 言語モード（ラジオの並び順） */
 const LANGS = ["java", "thymeleaf", "python", "c"];
 const LANG_NAMES = { java: "Java", thymeleaf: "Thymeleaf", python: "Python", c: "C" };
 let currentLang = "python";
@@ -348,8 +373,9 @@ function updateToolFlow(){
 new ResizeObserver(() => updateToolFlow()).observe(document.querySelector(".toolbar"));
 
 function renderToolbox(){
-  const symbols = currentLang === "python" ? PYTHON_SYMBOLS
-               : currentLang === "c"      ? C_SYMBOLS
+  const symbols = currentLang === "python"    ? PYTHON_SYMBOLS
+               : currentLang === "c"         ? C_SYMBOLS
+               : currentLang === "thymeleaf" ? THYMELEAF_SYMBOLS
                : JAVA_SYMBOLS;
   toolbox.innerHTML = "";
   function makeBtn(id){
@@ -372,14 +398,18 @@ function renderToolbox(){
     else if (id === "__paste") { b.textContent = "Import"; b.title = "クリップボードからSPDをインポート（/* */・\"\"\"・<!--/* */--> の囲み記号と、Java では行頭の # を取り除く）。Shift+クリックでカーソル位置に部分Import（既存は消さず矩形を上書き）"; }
     else if (id === "__clear") { b.textContent = "全消去"; b.title = "全消去（グリッド全体を空にする）"; }
     else if (id === "←")    { b.textContent = id; b.title = "代入"; }
-    else if (id === "→")    { b.textContent = id; b.title = "送る"; }
+    else if (id === "→")    { b.textContent = id; b.title = currentLang === "thymeleaf" ? "送信先・移動先" : "送る"; }
     else if (id === "⇒")    { b.textContent = id; b.title = "入力"; }
     else if (id === "->")   { b.textContent = id; b.title = "型ヒント"; }
     else if (id === "─⊳")   { b.textContent = id; b.title = "継承"; }
     else if (id === "---⊳") { b.textContent = id; b.title = "実装"; }
     else if (id === "λ():")        { b.textContent = id; b.title = "ラムダ式（Java 専用）"; }
     else if (id === "▽─stream:") { b.textContent = id; b.title = "ストリーム処理（Java 専用）"; }
-    else b.textContent = id;
+    else {
+      b.textContent = id;
+      const t = THYMELEAF_TITLES[id] || BRACKET_TITLES[id];
+      if (t) b.title = t;
+    }
     /* 記号・罫線ボタン（操作系 __xxx 以外）は Shift+クリックで文字入力欄へ挿入できる */
     if (!id.startsWith("__")){
       b.title = (b.title ? b.title + "  ／  " : "") + "Shift+クリックで文字入力欄のカーソル位置へ挿入";
@@ -390,14 +420,18 @@ function renderToolbox(){
     b.onclick = (e) => applyTool(id, e);
     return b;
   }
-  const lineSymbols = currentLang === "python" ? LINE_SYMBOLS : LINE_SYMBOLS_JAVA;
-  const arrowSymbols = currentLang === "python" ? ARROW_SYMBOLS_PYTHON
-                     : currentLang === "c"      ? ARROW_SYMBOLS_C
+  const lineSymbols = (currentLang === "python" || currentLang === "thymeleaf") ? LINE_SYMBOLS : LINE_SYMBOLS_JAVA;
+  const arrowSymbols = currentLang === "python"    ? ARROW_SYMBOLS_PYTHON
+                     : currentLang === "c"         ? ARROW_SYMBOLS_C
+                     : currentLang === "thymeleaf" ? ARROW_SYMBOLS_THYMELEAF
                      : ARROW_SYMBOLS_JAVA;
+  // Thymeleaf は罫線と矢印・括弧記号の間に縦線を入れない（v1.21.0）
+  const lineArrow = currentLang === "thymeleaf" ? [...lineSymbols, ...arrowSymbols]
+                                                : [...lineSymbols, "|", ...arrowSymbols];
   // 2段構成：段1=履歴(↩↪)＋言語別シンボル／段2=罫線・矢印・操作・クリア・入出力・保存/開く
   [
     ["__undo", "__redo", "|", ...symbols],
-    [...lineSymbols, "|", ...arrowSymbols, "|", "__insrow", "__delrow", "__cellcopy", "__cellpaste", "__erase", "__inscell", "|", "__clear", "|", "__copy", "__paste"]
+    [...lineArrow, "|", "__insrow", "__delrow", "__cellcopy", "__cellpaste", "__erase", "__inscell", "|", "__clear", "|", "__copy", "__paste"]
   ].forEach((items, i) => {
     const row = document.createElement("div");
     row.className = "toolrow" + (i === 1 ? " toolrow-sep" : "");
@@ -520,6 +554,13 @@ function applyTool(id, e){
     saveHistory();
     caret.slot = 0;
     flush(id);
+    /* 括弧記号は中身を追記しやすいよう、カーソルを括弧の中央へ置く（v1.21.0）。
+       前半の文字幅を半角単位で数え、マスとスロットに直す（全角＝2、半角＝1） */
+    if (BRACKET_SYMBOLS.includes(id)){
+      const units = [...id].slice(0, id.length / 2).reduce((n, ch) => n + (isHalf(ch) ? 1 : 2), 0);
+      const cx = x + Math.floor(units / 2);
+      if (cx < COLS) setCaret(cx, y, units % 2);
+    }
     current = "__text";
     renderToolbox();
     document.getElementById("cap").focus();
@@ -529,14 +570,15 @@ function applyTool(id, e){
 }
 
 /* 記号・罫線を文字入力欄（#cap）のカーソル位置へ挿入する。
-   選択範囲があれば置き換え、挿入後はカーソルを挿入文字列の直後へ置く。
+   選択範囲があれば置き換え、挿入後はカーソルを挿入文字列の直後（括弧記号は中央）へ置く。
    グリッド・ツールモード・履歴には一切触れない（入力欄の文字列を編集するだけ）。 */
 function insertIntoCap(str){
   const el = document.getElementById("cap");
   const s = (el.selectionStart == null) ? el.value.length : el.selectionStart;
   const t = (el.selectionEnd   == null) ? el.value.length : el.selectionEnd;
   el.value = el.value.slice(0, s) + str + el.value.slice(t);
-  const pos = s + str.length;
+  // 括弧記号はカーソルを括弧の中央へ（v1.21.0）
+  const pos = s + (BRACKET_SYMBOLS.includes(str) ? str.length / 2 : str.length);
   el.focus();
   el.setSelectionRange(pos, pos);
 }
@@ -582,7 +624,7 @@ function updateInfo(){
     if (caret)
       infoEl.textContent = "文字モード  (x=" + caret.x + ", y=" + caret.y + ")  "
         + (caret.slot === 0 ? "左スロット（半角1文字目）" : "右スロット（半角2文字目）")
-        + "  ／  入力欄で入力してEnter";
+        + "  ／  入力欄で入力してEnter（挿入）・Shift+Enter（上書き）";
     else
       infoEl.textContent = "文字モード — グリッドのマスをクリックして入力位置を選択";
     return;
@@ -1090,6 +1132,102 @@ function applyTextRunEdit(newText, { startX, endX, y }){
   }
   refreshAll();
   moveCaret();
+}
+
+/* ===== 挿入入力（Enter・v1.21.0） =====
+   入力欄の文字列をカーソル位置に挿入し、右側の内容をずらす（Shift+Enter は従来の上書き＝flush）。
+   ・カーソルが文字列（空マスで途切れない一続きのテキスト）の中にあれば、その文字列を
+     「前半＋入力＋後半」で書き直す。半角2文字のマスの途中（右スロット）でも、
+     半角の詰め直しとパディング位置（TX-21）は書き直しで決まり直す
+   ・右側は空マスの手前までをずらす。ずらした分は直後の空マスで吸収し、空マスが足りなければ
+     その先のまとまりも同じだけずらす（上書きで消さない）
+   ・行は折り返さない。右端からはみ出した分は捨てる
+   ・カーソルは挿入した文字列の直後に置く（続けて挿入できる） */
+
+/* 空マスで途切れない一続きのテキスト（罫線・記号は境界）。findTextRunAt と違い空マスは透過しない */
+function findTextRunNoGap(x, y){
+  if (!data[key(x, y)] || isRunBorder(x, y)) return null;
+  let startX = x, endX = x;
+  while (startX > 0 && data[key(startX - 1, y)] && !isRunBorder(startX - 1, y)) startX--;
+  while (endX < COLS - 1 && data[key(endX + 1, y)] && !isRunBorder(endX + 1, y)) endX++;
+  return { startX, endX, y };
+}
+/* テキストランの文字列を、マス cx・スロット slot の位置で前半と後半に分けて返す。
+   取り出し方（パディング除去）は extractTextRun と同じ */
+function splitTextRun({ startX, endX, y }, cx, slot){
+  let text = "", at = -1;
+  for (let x = startX; x <= endX; ){
+    const v = data[key(x, y)];
+    if (x === cx) at = text.length;
+    if (!v){ text += "　"; x++; continue; }
+    if (v.length === 1){
+      text += v; x++;
+      if (x - 1 === cx && slot === 1) at = text.length;   // 全角マスの右スロット＝そのマスの後ろ
+      continue;
+    }
+    const x0 = x;
+    let s = "";
+    while (x <= endX && data[key(x, y)] && data[key(x, y)].length === 2){ s += data[key(x, y)]; x++; }
+    const r = unpadHalfRun(s, data[key(x0 - 1, y)], data[key(x, y)], text);
+    if (cx >= x0 && cx < x){
+      let i = (cx - x0) * 2 + slot;
+      if (r.length < s.length && s[0] === " " && r === s.slice(1)) i--;   // 先頭パディングの分を戻す
+      at = text.length + Math.max(0, Math.min(r.length, i));
+    }
+    text += r;
+  }
+  if (at < 0) at = text.length;
+  return [text.slice(0, at), text.slice(at)];
+}
+function insertText(text){
+  if (!text || !caret) return;
+  const { x, y, slot } = caret;
+  const run = findTextRunNoGap(x, y);
+  let start, end, slot0 = 0, before = "", after = "";
+  if (run){
+    start = run.startX; end = run.endX;
+    [before, after] = splitTextRun(run, x, slot);
+  } else if (data[key(x, y)]){
+    // 罫線・記号のマス：右スロットならそのマスの後ろ、左スロットなら前に挿入する
+    start = slot === 1 ? x + 1 : x; end = start - 1;
+  } else {
+    start = x; end = x - 1; slot0 = slot;   // 空マス：flush と同じくスロットを生かす
+  }
+  if (start >= COLS) return;
+
+  // 書き直す文字列の右側（元の内容）を控えて、書き直し範囲から右端までを空にする
+  const rest = [];
+  for (let cx = end + 1; cx < COLS; cx++) rest.push(data[key(cx, y)]);
+  for (let cx = start; cx < COLS; cx++) delete data[key(cx, y)];
+
+  // 前半＋入力＋後半を書き込み、入力の最後の文字を書いた直後の位置を覚えておく
+  const chars = [...before, ...expandTabs(text), ...after];
+  const target = chars.length - [...after].length;
+  let n = 0, mark = null;
+  setCaret(start, y, slot0);
+  writeText(chars, (c, pad) => {
+    writeCharNoWrap(c, y, pad);
+    if (!pad && ++n === target && caret) mark = { x: caret.x, slot: caret.slot };
+  }, () => rest[0]);
+  if (!mark) mark = { x: caret.x, slot: caret.slot };
+
+  // 右側を d マスずらす。d マス分の空きが最初に現れる位置 p までをずらし、空きで吸収する
+  const tailX = caret.slot === 1 ? caret.x + 1 : caret.x;
+  const d = tailX - (end + 1);
+  let p = 0;
+  if (d > 0){
+    while (p < rest.length && rest.slice(p, p + d).some(v => v !== undefined)) p++;
+  } else {
+    while (p < rest.length && rest[p] !== undefined) p++;   // 短くなった場合はまとまりだけ左へ詰める
+  }
+  for (let i = 0; i < rest.length; i++){
+    if (rest[i] === undefined) continue;
+    const nx = i < p ? end + 1 + d + i : end + 1 + i;
+    if (nx < COLS) data[key(nx, y)] = rest[i];
+  }
+  refreshAll();
+  if (mark.x >= COLS) mark = { x: COLS - 1, slot: 1 };
+  setCaret(mark.x, y, mark.slot);
 }
 
 /* ===== アンドゥ・リドゥ ===== */
@@ -1769,7 +1907,9 @@ cap.addEventListener("keydown", e => {
       if (!text) return;
       ensureTextMode();
       saveHistory();
-      flush(text);
+      // Enter＝カーソル位置に挿入、Shift+Enter＝カーソル位置から上書き（v1.21.0）
+      if (e.shiftKey) flush(text);
+      else            insertText(text);
       current = "│";
       renderToolbox();
       updateInfo();
