@@ -42,7 +42,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 
 - 画面の本体は元リポジトリ（GitHub: kawaba/spd-editor、手元は `D:\★SPD\spd-editor`）の `spd-editor.html`。
   Eclipse 連携（下の約束事の JS 側）も元に入っている（v1.19.0〜。仕様書 §6.13・§7.13e）。単体ブラウザでは何もしない作り
-- `web/editor.html`・`web/spd-config.js`・`web/spd-patterns.js` は**直接編集しない**。元を直してコミットし、
+- `web/editor.html`・`web/javase-patterns.js`・`web/spring-patterns.js`・`web/thymeleaf-patterns.js` は**直接編集しない**。元を直してコミットし、
   `powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` で複製する（`-Source` で元のフォルダを変えられる）。
   このときプラグインの版も SPD エディタの版にそろう
 - 元のリポジトリの運用：`spd-editor.html` は直下・`1-python`・`2-java`・`3-C` の4か所を同じ内容にする。
@@ -81,7 +81,12 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
   mode=view では「保存」ボタンを「保存…」（名前を付けて保存）と表示する。
 - Eclipse 2026 では未保存のエディタはタブ名に `*` が付かず、閉じるボタン × が ● になる（既定の設定）。
-- `web/spd-config.js`（既定の言語）と `web/spd-patterns.js`（スケルトン）は元のエディタの `2-java/` から `sync-web.ps1` で複製する。
+- スケルトン（`web/javase-patterns.js`・`web/spring-patterns.js`・`web/thymeleaf-patterns.js`）は元のエディタの `2-java/` から
+  `sync-web.ps1` で複製する。言語を切り替えたときにその言語のファイルを読む（元の仕様書 §6.12 SK-07・v1.22.0〜）
+- `web/spd-config.js` は**プラグイン専用**で、複製しない（2026-10-29 決定）。
+  `{ lang: "java", langs: ["java", "spring", "thymeleaf"] }` で、ラジオに JavaSE・Spring・Thymeleaf だけを出す
+  （Python・C は出さない。元の仕様書 §6.10 CF-06）。言語を変えるときは `SpdNewFileWizard.LANGS` も同時に直す。
+  Python・C で保存した `.spd` を開いたときは、その言語のラジオだけが足される
 
 ## .spd ファイル形式（2026-10-09 決定）
 
@@ -97,7 +102,8 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 }
 ```
 
-- `lang`：`java` / `thymeleaf` / `python` / `c`（JS の `LANGS` と `SpdNewFileWizard.LANGS` を揃える）
+- `lang`：`java`（JavaSE）/ `spring` / `thymeleaf` / `python` / `c`（JS の `LANGS` のいずれか。
+  新規ファイルウィザード `SpdNewFileWizard.LANGS` で選べるのは `java` / `spring` / `thymeleaf` だけ）
 - `data`：キーは `"x,y"`（0 起点の列,行）、値はそのマスの文字（全角1文字、または半角2文字）。空マスは持たない
 - 文字コードは UTF-8。人が読む・Git で差分を見る・コード生成の入力にするテキスト形式は、
   必要になったら「書き出し」として別に用意する（ファイル形式は変えない）

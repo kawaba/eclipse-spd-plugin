@@ -26,9 +26,9 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
  */
 public class SpdNewFileWizard extends BasicNewResourceWizard {
 
-    /** 言語の値（web/editor.html の LANGS と揃える）と表示名 */
-    static final String[] LANGS = { "java", "thymeleaf", "python", "c" };
-    private static final String[] LANG_NAMES = { "Java", "Thymeleaf", "Python", "C" };
+    /** 言語の値（web/editor.html の LANGS と揃える）と表示名。web/spd-config.js の langs と同じ3つにする */
+    static final String[] LANGS = { "java", "spring", "thymeleaf" };
+    private static final String[] LANG_NAMES = { "JavaSE", "Spring", "Thymeleaf" };
     private static final String DEFAULT_LANG = "java";
 
     /** 前回選んだ言語を覚えておく設定のキー */

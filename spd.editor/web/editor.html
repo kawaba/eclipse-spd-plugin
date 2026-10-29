@@ -36,7 +36,7 @@
     font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",var(--mono);
   }
   .helplink:hover{ background:var(--accent-bg); }
-  /* スケルトン選択（タイトル行・📖 の左・v1.18.0）。spd-patterns.js が無ければ非表示 */
+  /* スケルトン選択（タイトル行・📖 の左・v1.18.0）。言語ごとの xxx-patterns.js が無ければ非表示（v1.22.0） */
   select.skeleton{
     font-family:var(--mono); font-size:12px; height:28px; padding:0 6px;
     background:#fff; color:var(--text);
@@ -119,7 +119,7 @@
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
     <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
-    <h1>SPD Editor<span class="ver">ver. 1.21.2</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.22.0</span></h1>
   </div>
 </div>
 
@@ -139,20 +139,13 @@
 </div>
 
 <!-- 起動時設定（任意）。同フォルダに spd-config.js があれば読み込む。
-     例： var SPD_CONFIG = { lang: "java" };   （lang は "java" / "thymeleaf" / "python" / "c"）
+     例： var SPD_CONFIG = { lang: "java" };   （lang は "java"(JavaSE) / "spring" / "thymeleaf" / "python" / "c"）
+         var SPD_CONFIG = { lang: "java", langs: ["java", "spring", "thymeleaf"] };
+           （langs：ラジオに出す言語。省略時は全言語・v1.22.0）
      ファイルが無ければ読み込み失敗（無視）し、従来どおり既定で起動する。
-     <script src> はローカル直開き(file://)・サーバ運用のどちらでも動作する。 -->
+     <script src> はローカル直開き(file://)・サーバ運用のどちらでも動作する。
+     スケルトン定義（xxx-patterns.js）は言語を切り替えたときに読み込む（PATTERN_FILES・v1.22.0）。 -->
 <script src="spd-config.js"></script>
-<!-- スケルトン定義（任意・v1.18.0）。同フォルダに spd-patterns.js があれば読み込み、
-     タイトル行のセレクトボックスに並べる。書式は ★タイトル 行で区切った SPD テキスト：
-       var SPD_PATTERNS = `
-       ★コントローラー
-       コントローラー：□□
-       ├─目的：□□
-       …
-       `;
-     ファイルが無ければ読み込み失敗（無視）し、セレクトボックスを表示しない。 -->
-<script src="spd-patterns.js"></script>
 
 <script>
 /* ===== 実行環境 =====
@@ -261,10 +254,25 @@ const ARROW_SYMBOLS_PYTHON = ["←","->"];
 const ARROW_SYMBOLS_C      = ["←"];
 /* Thymeleaf は罫線グループと区切らずに → と括弧記号を続ける（v1.21.0） */
 const ARROW_SYMBOLS_THYMELEAF = ["→", ...BRACKET_SYMBOLS];
-/* 言語モード（ラジオの並び順） */
-const LANGS = ["java", "thymeleaf", "python", "c"];
-const LANG_NAMES = { java: "Java", thymeleaf: "Thymeleaf", python: "Python", c: "C" };
+/* 言語モード（ラジオの並び順）。java は JavaSE（保存済みのファイルと合わせるため値は "java" のまま・v1.22.0） */
+const LANGS = ["java", "spring", "thymeleaf", "python", "c"];
+const LANG_NAMES = { java: "JavaSE", spring: "Spring", thymeleaf: "Thymeleaf", python: "Python", c: "C" };
+/* Spring は JavaSE と同じツールバー・Export・Import（v1.22.0） */
+const isJavaLang = lang => lang === "java" || lang === "spring";
 let currentLang = "python";
+
+/* ラジオに出す言語（SPD_CONFIG.langs・v1.22.0）。指定が無ければ全言語。
+   指定に無い言語のファイルを開いたときは、その言語も出す（知らないうちに言語が変わらないように） */
+function configLangs(){
+  const cfg = (typeof SPD_CONFIG !== "undefined" && SPD_CONFIG && Array.isArray(SPD_CONFIG.langs))
+            ? SPD_CONFIG.langs : [];
+  const list = LANGS.filter(l => cfg.includes(l));
+  return list.length ? list : LANGS.slice();
+}
+function visibleLangs(){
+  const list = configLangs();
+  return LANGS.filter(l => list.includes(l) || l === currentLang);
+}
 
 /* current は「直前に使ったツール／現在のモード」を保持する。
    ツールボタン押下時にアクティブ表示するために使う。
@@ -332,6 +340,7 @@ for (let y = 0; y < ROWS; y++){
 const GUIDE_URL = "https://k-webs.jp/spd/spd-guide.pdf";        // 仮URL（未確定）
 const PATTERN_URL = {
   java:   "https://k-webs.jp/spd/spd-java.html",                 // 確定
+  spring: "https://k-webs.jp/spd/spd-java.html",                 // JavaSE と同じページ
   python: "https://k-webs.jp/spd/spd-python.html",               // 仮URL（未確定）
   c:      "https://k-webs.jp/spd/spd-c.html"                     // 仮URL（未確定）
 };
@@ -394,8 +403,8 @@ function renderToolbox(){
     else if (id === "__delrow")  { b.textContent = "行-"; b.title = "行削除（現在行を削除して下をシフト）"; }
     else if (id === "__undo")  { b.textContent = "↩"; b.title = "元に戻す (Ctrl+Z)"; b.classList.add("histbtn"); }
     else if (id === "__redo")  { b.textContent = "↪"; b.title = "やり直す (Ctrl+Y)"; b.classList.add("histbtn"); }
-    else if (id === "__copy")  { b.textContent = "Export"; b.title = "SPDをクリップボードへエクスポート（コメント付き・行頭や前後の余白は詰める）。範囲選択中はその部分だけをExport。Shift+クリックでコメント記号なし・余白もそのままExport。Java では Alt+クリックで全行の行頭に「#」を付けてExport（application.properties 用）"; }
-    else if (id === "__paste") { b.textContent = "Import"; b.title = "クリップボードからSPDをインポート（/* */・\"\"\"・<!--/* */--> の囲み記号と、Java では行頭の # を取り除く）。Shift+クリックでカーソル位置に部分Import（既存は消さず矩形を上書き）"; }
+    else if (id === "__copy")  { b.textContent = "Export"; b.title = "SPDをクリップボードへエクスポート（コメント付き・行頭や前後の余白は詰める）。範囲選択中はその部分だけをExport。Shift+クリックでコメント記号なし・余白もそのままExport。JavaSE・Spring では Alt+クリックで全行の行頭に「#」を付けてExport（application.properties 用）"; }
+    else if (id === "__paste") { b.textContent = "Import"; b.title = "クリップボードからSPDをインポート（/* */・\"\"\"・<!--/* */--> の囲み記号と、JavaSE・Spring では行頭の # を取り除く）。Shift+クリックでカーソル位置に部分Import（既存は消さず矩形を上書き）"; }
     else if (id === "__clear") { b.textContent = "全消去"; b.title = "全消去（グリッド全体を空にする）"; }
     else if (id === "←")    { b.textContent = id; b.title = "代入"; }
     else if (id === "→")    { b.textContent = id; b.title = currentLang === "thymeleaf" ? "送信先・移動先" : "送る"; }
@@ -465,9 +474,9 @@ function renderToolbox(){
   });
   updateToolFlow();
 
-  // 言語切替ラジオ（Java / Thymeleaf / Python / C）はタイトル行（langbar・左詰め）に配置
+  // 言語切替ラジオ（JavaSE / Spring / Thymeleaf / Python / C）はタイトル行（langbar・左詰め）に配置
   langbar.innerHTML = "";
-  LANGS.forEach(lang => {
+  visibleLangs().forEach(lang => {
     const label = document.createElement("label");
     label.className = "lang-label";
     const radio = document.createElement("input");
@@ -481,6 +490,7 @@ function renderToolbox(){
   });
 
   updateHelpLinks();   // 💡 のリンク先を現在の言語に追従させる
+  updateSkeletons();   // スケルトンを現在の言語のものにする（SK-07）
 }
 
 /* ===== ツール適用（ボタン押下時に呼ばれる。e はクリックイベント） ===== */
@@ -497,8 +507,8 @@ function applyTool(id, e){
   if (id === "__cellcopy"){ copyCells(); return; }
   if (id === "__copy"){                                        // 範囲選択時は部分Export／Shift+Export = コメント記号なし
     const alt = !!(e && e.altKey);
-    // Alt+Export = # コメント（Java のみ）。Java 以外の Alt と Shift+Alt は無効（何もしない）
-    if (alt && (currentLang !== "java" || e.shiftKey)) return;
+    // Alt+Export = # コメント（JavaSE・Spring のみ）。それ以外の Alt と Shift+Alt は無効（何もしない）
+    if (alt && (!isJavaLang(currentLang) || e.shiftKey)) return;
     doCopy(!!(e && e.shiftKey), alt);
     return;
   }
@@ -1426,7 +1436,7 @@ function parseSPDText(text){
 // ===== Import 用：コメント記号の除去 =====
 // (1) 囲み記号：空行を除いた最初と最後の行が WRAP_MARKS の組（Java/C・Python・Thymeleaf）なら
 //     その2行（と外側の空行）を取り除く。言語モードに関係なく中身で判定し、行の前後の空白は無視する。
-// (2) 行頭の #（Java モードのみ）：空行以外のすべての行が # で始まるときだけ、
+// (2) 行頭の #（JavaSE・Spring モードのみ）：空行以外のすべての行が # で始まるときだけ、
 //     各行の先頭の "#" と直後の半角空白（最大2個）を取り除く（Alt+Export・EI-13 の逆）。
 // 戻り値 { text, stripped }（stripped=何か取り除いたか）
 const WRAP_MARKS = [["/*", "*/"], ['"""', '"""'], ["<!--/*", "*/-->"]];
@@ -1441,7 +1451,7 @@ function stripCommentMarks(text){
     lines = lines.slice(a + 1, b);
     stripped = true;
   }
-  if (currentLang === "java"){
+  if (isJavaLang(currentLang)){
     const body = lines.filter(s => !isBlank(s));
     if (body.length > 0 && body.every(s => s.startsWith("#"))){
       lines = lines.map(s => s.replace(/^# {0,2}/, ""));
@@ -1504,12 +1514,67 @@ function doPaste(partial){
   }).catch(() => { infoEl.textContent = "クリップボードを読み取れませんでした"; });
 }
 
-/* ===== スケルトン（SK-01〜05・v1.18.0） =====
-   spd-patterns.js の SPD_PATTERNS（★タイトル 行で区切った SPD テキスト）を読み、
+/* ===== スケルトン（SK-01〜07・v1.18.0） =====
+   言語ごとのファイル（PATTERN_FILES）の SPD_PATTERNS（★タイトル 行で区切った SPD テキスト）を読み、
    タイトル行のセレクトボックスから選ぶと、カーソル位置を左上として部分Import と同じ
    ブロック貼り付けを行う。貼り付け先の内容は確認なしで上書きする（アンドゥで戻せる）。 */
 const skeletonEl = document.getElementById("skeleton");
 let skeletons = [];                   // [{ title, body }]
+
+/* 言語ごとのスケルトン定義（v1.22.0）。どれも同じ変数 SPD_PATTERNS を定義するので、
+   言語を切り替えたときにその言語のファイルだけを <script> で読み込む（file:// でも動く） */
+const PATTERN_FILES = {
+  java:      "javase-patterns.js",
+  spring:    "spring-patterns.js",
+  thymeleaf: "thymeleaf-patterns.js",
+  python:    "python-patterns.js",
+  c:         "c-patterns.js"
+};
+const skeletonCache = {};             // 言語 → [{ title, body }]（ファイルが無い・空なら []）
+const skeletonLoading = {};           // 読み込み中の言語
+let skeletonLang = null;              // セレクトボックスに並べている言語
+
+/* セレクトボックスを現在の言語のスケルトンにする。renderToolbox から呼ばれる（SK-07） */
+function updateSkeletons(){
+  const lang = currentLang;
+  if (skeletonLang === lang) return;
+  skeletonLang = lang;
+  if (skeletonCache[lang]){ showSkeletons(skeletonCache[lang]); return; }
+  showSkeletons([]);                  // 読み込むまでは隠す
+  if (skeletonLoading[lang]) return;
+  const file = PATTERN_FILES[lang];
+  if (!file){ skeletonCache[lang] = []; return; }
+  skeletonLoading[lang] = true;
+  window.SPD_PATTERNS = undefined;
+  const s = document.createElement("script");
+  const done = list => {
+    skeletonCache[lang] = list;
+    delete skeletonLoading[lang];
+    s.remove();
+    if (skeletonLang === lang) showSkeletons(list);   // 読み込み中に言語が変わっていたら表示しない
+  };
+  // load は読み込んだスクリプトの実行直後に起こるので、SPD_PATTERNS はこの言語のもの
+  s.onload  = () => done(window.SPD_PATTERNS ? parseSkeletons(window.SPD_PATTERNS) : []);
+  s.onerror = () => done([]);
+  s.src = file;
+  document.head.appendChild(s);
+}
+
+/* スケルトンをセレクトボックスに並べる。1つも無ければセレクトボックスを隠す */
+function showSkeletons(list){
+  skeletons = list;
+  skeletonEl.innerHTML = "";
+  skeletonEl.hidden = list.length === 0;
+  if (list.length === 0) return;
+  const head = document.createElement("option");
+  head.value = ""; head.textContent = "スケルトン…";
+  skeletonEl.appendChild(head);
+  list.forEach((p, i) => {
+    const o = document.createElement("option");
+    o.value = String(i); o.textContent = p.title;
+    skeletonEl.appendChild(o);
+  });
+}
 
 /* ★ で始まる行をタイトル、次の ★ までを本文とする。最初の ★ より前の行は無視（説明用）。
    本文の前後の空行は除き、途中の空行は残す。本文が空のものは捨てる。 */
@@ -1534,26 +1599,12 @@ function parseSkeletons(src){
   }).filter(p => p.title && p.body);
 }
 
-function initSkeletons(){
-  if (typeof SPD_PATTERNS === "undefined" || !SPD_PATTERNS) return;
-  skeletons = parseSkeletons(SPD_PATTERNS);
-  if (skeletons.length === 0) return;
-  const head = document.createElement("option");
-  head.value = ""; head.textContent = "スケルトン…";
-  skeletonEl.appendChild(head);
-  skeletons.forEach((p, i) => {
-    const o = document.createElement("option");
-    o.value = String(i); o.textContent = p.title;
-    skeletonEl.appendChild(o);
-  });
-  skeletonEl.hidden = false;
-  skeletonEl.addEventListener("change", () => {
-    const i = skeletonEl.value;
-    skeletonEl.value = "";            // 見出しへ戻す（同じスケルトンを続けて選べるように）
-    skeletonEl.blur();                // 矢印キー等をグリッド操作へ戻す
-    if (i !== "") insertSkeleton(Number(i));
-  });
-}
+skeletonEl.addEventListener("change", () => {
+  const i = skeletonEl.value;
+  skeletonEl.value = "";              // 見出しへ戻す（同じスケルトンを続けて選べるように）
+  skeletonEl.blur();                  // 矢印キー等をグリッド操作へ戻す
+  if (i !== "") insertSkeleton(Number(i));
+});
 
 function insertSkeleton(i){
   const p = skeletons[i];
@@ -1640,7 +1691,7 @@ function applyLoadedJSON(text){
     const obj = JSON.parse(text);
     for (const k in data) delete data[k];
     if (obj.data) Object.assign(data, obj.data);
-    if (obj.lang) currentLang = obj.lang;
+    if (obj.lang && LANGS.includes(obj.lang)) currentLang = obj.lang;
     cancelSelection();
     clearCaret();
     current = "│";
@@ -2068,9 +2119,10 @@ if (typeof SPD_CONFIG !== "undefined" && SPD_CONFIG && SPD_CONFIG.lang
     && LANGS.includes(SPD_CONFIG.lang)){
   currentLang = SPD_CONFIG.lang;
 }
-renderToolbox();
+// 既定の言語がラジオに出す言語（SPD_CONFIG.langs）に無ければ、その先頭にする
+if (!configLangs().includes(currentLang)) currentLang = configLangs()[0];
+renderToolbox();       // 現在の言語のスケルトンもここで読み込む（SK-07）
 updateInfo();
-initSkeletons();       // spd-patterns.js があればスケルトン選択を表示（SK-01）
 if (IN_ECLIPSE){
   setupEclipseBridge();  // 保存・ダーティ管理は Eclipse が行うので、自動保存と離脱確認は使わない
 } else {

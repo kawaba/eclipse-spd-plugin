@@ -26,7 +26,7 @@ Eclipse Marketplace（https://marketplace.eclipse.org/）は、プラグイン�
 
 ### 1.1 中身の確認
 
-- [ ] `web/editor.html`・`spd-config.js`・`spd-patterns.js` が元の SPD エディタの最新になっている
+- [ ] `web/editor.html`・`javase-patterns.js`・`spring-patterns.js`・`thymeleaf-patterns.js` が元の SPD エディタの最新になっている
       （`powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` を実行し、すべて「変更なし」になる）
 - [ ] 同梱フォントのライセンス文 `web/fonts/LICENSE-PlemolJP.txt` が入っている（SIL OFL 1.1 の条件）
 - [ ] `feature.xml` の表示内容を見直す
