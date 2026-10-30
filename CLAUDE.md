@@ -34,7 +34,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 ├── spd.site/               p2 アップデートサイト（target/repository/ を公開する）
 │   └── pages/index.html    公開サイトの直下に置く学生向けの説明ページ
 ├── .github/workflows/pages.yml  タグ v* の push で GitHub Pages（https://kawaba.github.io/eclipse-spd-plugin/）に公開
-├── doc/plugin-howto.md     公開（GitHub Pages・Marketplace）の手順書
+├── doc/plugin-howto.md     公開（GitHub Pages・Marketplace）の手順書（doc/ は手元だけで、リポジトリには含めない）
 └── sync-web.ps1            元の SPD エディタから web/ へ複製するスクリプト
 ```
 
