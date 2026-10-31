@@ -5,9 +5,9 @@
   あわせて、プラグインの版（pom・MANIFEST・feature.xml）を SPD エディタの版（ver. X.Y.Z）にそろえる。
 
     元の spd-editor.html               → spd.editor/web/editor.html
-    元の 2-java/javase-patterns.js     → spd.editor/web/javase-patterns.js
-    元の 2-java/spring-patterns.js     → spd.editor/web/spring-patterns.js
-    元の 2-java/thymeleaf-patterns.js  → spd.editor/web/thymeleaf-patterns.js
+    元の patterns/javase-patterns.js     → spd.editor/web/patterns/javase-patterns.js
+    元の patterns/spring-patterns.js     → spd.editor/web/patterns/spring-patterns.js
+    元の patterns/thymeleaf-patterns.js  → spd.editor/web/patterns/thymeleaf-patterns.js
 
   web/spd-config.js はプラグイン専用（ラジオに出す言語を JavaSE・Spring・Thymeleaf に絞る）なので複製しない。
 
@@ -25,13 +25,13 @@ $web = Join-Path $PSScriptRoot "spd.editor\web"
 
 $files = @(
     @{ From = "spd-editor.html";              To = "editor.html" },
-    @{ From = "2-java\javase-patterns.js";    To = "javase-patterns.js" },
-    @{ From = "2-java\spring-patterns.js";    To = "spring-patterns.js" },
-    @{ From = "2-java\thymeleaf-patterns.js"; To = "thymeleaf-patterns.js" }
+    @{ From = "patterns\javase-patterns.js";    To = "patterns\javase-patterns.js" },
+    @{ From = "patterns\spring-patterns.js";    To = "patterns\spring-patterns.js" },
+    @{ From = "patterns\thymeleaf-patterns.js"; To = "patterns\thymeleaf-patterns.js" }
 )
 
-# 元で使わなくなったファイル（v1.21.2 までの全言語共通のスケルトン）は web/ からも消す
-foreach ($old in @("spd-patterns.js")) {
+# 元で使わなくなったファイル（v1.21.2 までの全言語共通のスケルトンと、v1.22.x までの web/ 直下のスケルトン）は web/ からも消す
+foreach ($old in @("spd-patterns.js", "javase-patterns.js", "spring-patterns.js", "thymeleaf-patterns.js")) {
     $p = Join-Path $web $old
     if (Test-Path $p) {
         Remove-Item $p
@@ -48,6 +48,7 @@ foreach ($f in $files) {
     $from = Join-Path $Source $f.From
     $to   = Join-Path $web $f.To
     if (-not (Test-Path $from)) { throw "見つかりません: $from" }
+    New-Item -ItemType Directory -Force -Path (Split-Path $to) | Out-Null
     $bytes = [System.IO.File]::ReadAllBytes($from)
     $note = ""
     try {

@@ -42,7 +42,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 
 - 画面の本体は元リポジトリ（GitHub: kawaba/spd-editor、手元は `D:\★SPD\spd-editor`）の `spd-editor.html`。
   Eclipse 連携（下の約束事の JS 側）も元に入っている（v1.19.0〜。仕様書 §6.13・§7.13e）。単体ブラウザでは何もしない作り
-- `web/editor.html`・`web/javase-patterns.js`・`web/spring-patterns.js`・`web/thymeleaf-patterns.js` は**直接編集しない**。元を直してコミットし、
+- `web/editor.html`・`web/patterns/javase-patterns.js`・`web/patterns/spring-patterns.js`・`web/patterns/thymeleaf-patterns.js` は**直接編集しない**。元を直してコミットし、
   `powershell -ExecutionPolicy Bypass -File .\sync-web.ps1` で複製する（`-Source` で元のフォルダを変えられる）。
   このときプラグインの版も SPD エディタの版にそろう
 - 元のリポジトリの運用：`spd-editor.html` は直下・`1-python`・`2-java`・`3-C` の4か所を同じ内容にする。
@@ -81,7 +81,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
   mode=view では「保存」ボタンを「保存…」（名前を付けて保存）と表示する。
 - Eclipse 2026 では未保存のエディタはタブ名に `*` が付かず、閉じるボタン × が ● になる（既定の設定）。
-- スケルトン（`web/javase-patterns.js`・`web/spring-patterns.js`・`web/thymeleaf-patterns.js`）は元のエディタの `2-java/` から
+- スケルトン（`web/patterns/javase-patterns.js`・`web/patterns/spring-patterns.js`・`web/patterns/thymeleaf-patterns.js`）は元のエディタの `patterns/` から
   `sync-web.ps1` で複製する。言語を切り替えたときにその言語のファイルを読む（元の仕様書 §6.12 SK-07・v1.22.0〜）
 - `web/spd-config.js` は**プラグイン専用**で、複製しない（2026-10-29 決定）。
   `{ lang: "java", langs: ["java", "spring", "thymeleaf"] }` で、ラジオに JavaSE・Spring・Thymeleaf だけを出す
