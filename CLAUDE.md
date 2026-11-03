@@ -105,6 +105,9 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 - `lang`：`java`（JavaSE）/ `spring` / `thymeleaf` / `python` / `c`（JS の `LANGS` のいずれか。
   新規ファイルウィザード `SpdNewFileWizard.LANGS` で選べるのは `java` / `spring` / `thymeleaf` だけ）
 - `data`：キーは `"x,y"`（0 起点の列,行）、値はそのマスの文字（全角1文字、または半角2文字）。空マスは持たない
+  - 半角2文字のマスのうち、グリッドの都合で入るパディングのスロットは印 `\u001F` で保存される
+    （SPD エディタ v1.24.0〜。JSON では `"\u001f"`）。エディタが Export で取り除くので、Java 側で扱う必要はない。
+    v1.23.0 以前のエディタではパディングも半角空白で保存されていた
 - 文字コードは UTF-8。人が読む・Git で差分を見る・コード生成の入力にするテキスト形式は、
   必要になったら「書き出し」として別に用意する（ファイル形式は変えない）
 - 形式を変えるときは、古いファイルも読めるようにする（`loadSpd` で判別する）
