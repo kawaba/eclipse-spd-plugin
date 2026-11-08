@@ -5,6 +5,7 @@
   あわせて、プラグインの版（pom・MANIFEST・feature.xml）を SPD エディタの版（ver. X.Y.Z）にそろえる。
 
     元の spd-editor.html               → spd.editor/web/editor.html
+    元の spd-core.js                   → spd.editor/web/spd-core.js（共通の処理。v1.25.0〜。無いと画面が止まる）
     元の patterns/javase-patterns.js     → spd.editor/web/patterns/javase-patterns.js
     元の patterns/spring-patterns.js     → spd.editor/web/patterns/spring-patterns.js
     元の patterns/thymeleaf-patterns.js  → spd.editor/web/patterns/thymeleaf-patterns.js
@@ -25,6 +26,7 @@ $web = Join-Path $PSScriptRoot "spd.editor\web"
 
 $files = @(
     @{ From = "spd-editor.html";              To = "editor.html" },
+    @{ From = "spd-core.js";                  To = "spd-core.js" },
     @{ From = "patterns\javase-patterns.js";    To = "patterns\javase-patterns.js" },
     @{ From = "patterns\spring-patterns.js";    To = "patterns\spring-patterns.js" },
     @{ From = "patterns\thymeleaf-patterns.js"; To = "patterns\thymeleaf-patterns.js" }
