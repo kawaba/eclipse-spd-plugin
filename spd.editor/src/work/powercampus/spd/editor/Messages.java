@@ -24,6 +24,12 @@ public final class Messages extends NLS {
     public static String SpdNewFileWizard_pageDescription;
     public static String SpdNewFileWizard_lang;
 
+    public static String SpdPreferencePage_description;
+    public static String SpdPreferencePage_mode;
+    public static String SpdPreferencePage_modeDefault;
+    public static String SpdPreferencePage_modeImport;
+    public static String SpdPreferencePage_modeExam;
+
     public static String OpenFontFolder_failed;
     public static String OpenFontFolder_openDirectly;
 

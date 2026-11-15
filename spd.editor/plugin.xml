@@ -61,6 +61,15 @@
       </wizard>
    </extension>
 
+   <!-- 設定ページ（ウィンドウ → 設定 → SPD）。利用モードを選ぶ（v1.29.0） -->
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+            id="work.powercampus.spd.preferencePage"
+            name="SPD"
+            class="work.powercampus.spd.editor.SpdPreferencePage">
+      </page>
+   </extension>
+
    <!-- フォントのフォルダを開くコマンド（web/fonts/ をエクスプローラーで開く） -->
    <extension point="org.eclipse.ui.commands">
       <command
@@ -89,6 +98,14 @@
                   style="push">
                <parameter name="newWizardId"
                      value="work.powercampus.spd.editor.SpdNewFileWizard"/>
+            </command>
+            <separator name="preferences" visible="true"/>
+            <command
+                  commandId="org.eclipse.ui.window.preferences"
+                  label="%menu.preferences"
+                  style="push">
+               <parameter name="preferencePageId"
+                     value="work.powercampus.spd.preferencePage"/>
             </command>
             <separator name="font" visible="true"/>
             <command

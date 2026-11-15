@@ -115,7 +115,11 @@ class SpdBrowser {
             URL entry = Activator.getDefault().getBundle().getEntry(HTML_PATH);
             // Eclipse-BundleShape: dir により、同じフォルダの CSS/JS も参照できる
             // ?host=eclipse で JS 側に Eclipse 内で動いていることを知らせる（自動保存・離脱確認を止める）
-            return FileLocator.toFileURL(entry).toString() + "?host=eclipse&mode=" + mode;
+            // 利用モード（設定 → SPD）は &import・&exam で渡す（default は何も付けない。元の仕様書 LG-13）。
+            // mode= は画面の種類（editor／view）なので、利用モードとは別のもの
+            String spdMode = SpdPreferencePage.mode();
+            String modeParam = SpdPreferencePage.MODE_DEFAULT.equals(spdMode) ? "" : "&" + spdMode;
+            return FileLocator.toFileURL(entry).toString() + "?host=eclipse&mode=" + mode + modeParam;
         } catch (IOException e) {
             Activator.log(e);
             return "about:blank";

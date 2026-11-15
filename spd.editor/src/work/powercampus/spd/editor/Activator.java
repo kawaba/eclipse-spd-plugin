@@ -16,6 +16,7 @@ public class Activator extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+        SpdPreferencePage.initDefaults(getPreferenceStore());   // 利用モードの既定値（default）
     }
 
     @Override

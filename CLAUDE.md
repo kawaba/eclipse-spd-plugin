@@ -28,6 +28,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 │   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（保存＝上書き、ダーティ表示）
 │   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
 │   │   └── OpenFontFolderHandler.java  メニュー「SPD → フォントのフォルダを開く」（web/fonts/ を開く）
+│   │   └── SpdPreferencePage.java  設定ページ「ウィンドウ → 設定 → SPD」。利用モード（default／import／exam）を選ぶ（v1.29.0）
 │   ├── web/editor.html     元の SPD エディタ（spd-editor.html）の複製。sync-web.ps1 で上書きする
 │   └── web/fonts/          PlemolJP HS v3.1.0（Regular のみ・SIL OFL 1.1）、spd-font.epf（Eclipse のフォント設定だけ）、README.txt（使い方）
 ├── spd.feature/            Feature（Marketplace 登録に必要）。p2.inf でインストール時に更新先 URL を登録する
@@ -80,6 +81,9 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 - Java は `web/editor.html?host=eclipse&mode=editor|view` で開く。JS 側は host（または BrowserFunction の有無）で
   Eclipse 内と判断し、localStorage の自動保存・離脱確認・「開く」ボタンを無効にする。
   mode=view では「保存」ボタンを「保存…」（名前を付けて保存）と表示する。
+- 利用モード（v1.29.0・元の仕様書 LG-13）は設定ページ「SPD」（`SpdPreferencePage`。ワークスペースごとの設定）で選び、
+  `SpdBrowser.resolveHtmlUrl` が URL に `&import`・`&exam` を付けて渡す（default は付けない）。`mode=` は画面の種類で、利用モードとは別。
+  画面を開くときに渡すので、開いているエディタ・ビューには効かない（閉じて開き直す）。メニュー「SPD → 利用モードの設定...」からも開ける
 - Eclipse 2026 では未保存のエディタはタブ名に `*` が付かず、閉じるボタン × が ● になる（既定の設定）。
 - スケルトン（`web/patterns/javase-patterns.js`・`web/patterns/spring-patterns.js`・`web/patterns/thymeleaf-patterns.js`）は元のエディタの `patterns/` から
   `sync-web.ps1` で複製する。言語を切り替えたときにその言語のファイルを読む（元の仕様書 §6.12 SK-07・v1.22.0〜）
