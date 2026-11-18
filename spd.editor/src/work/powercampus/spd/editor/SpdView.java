@@ -9,9 +9,11 @@ import java.nio.file.Path;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
@@ -143,6 +145,7 @@ public class SpdView extends ViewPart {
         IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
         try {
             writeFile(file, text);
+            rememberLastSaved(file);
             getViewSite().getActionBars().getStatusLineManager()
                     .setMessage(NLS.bind(Messages.SpdView_saved, file.getFullPath()));
         } catch (CoreException e) {
@@ -152,15 +155,46 @@ public class SpdView extends ViewPart {
         }
     }
 
-    /** 最後に使っていたエディタのファイルと同じフォルダー・同じ名前（例：Hello.java → Hello.spd）を提案する */
+    /**
+     * 保存先の提案。
+     * フォルダー：前回保存したフォルダー（まだあれば）。なければ最後に使っていたエディタのファイルと同じフォルダー。
+     * 名前：最後に使っていたエディタのファイルと同じ名前（例：Hello.java → Hello.spd）。なければ前回保存した名前。
+     */
     private IFile suggestFile() {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        IPath editorPath = null;
         IEditorPart editor = getSite().getPage().getActiveEditor();
-        if (editor == null || !(editor.getEditorInput() instanceof IFileEditorInput)) {
-            return null;
+        if (editor != null && editor.getEditorInput() instanceof IFileEditorInput) {
+            IFile source = ((IFileEditorInput) editor.getEditorInput()).getFile();
+            editorPath = source.getFullPath().removeFileExtension().addFileExtension("spd");
         }
-        IFile source = ((IFileEditorInput) editor.getEditorInput()).getFile();
-        IPath name = source.getFullPath().removeFileExtension().addFileExtension("spd");
-        return ResourcesPlugin.getWorkspace().getRoot().getFile(name);
+        IPath lastPath = lastSaved();
+        if (lastPath != null && lastPath.segmentCount() >= 2
+                && root.findMember(lastPath.removeLastSegments(1)) instanceof IContainer) {
+            String name = editorPath != null ? editorPath.lastSegment() : lastPath.lastSegment();
+            return root.getFile(lastPath.removeLastSegments(1).append(name));
+        }
+        return editorPath != null ? root.getFile(editorPath) : null;
+    }
+
+    // 前回の保存先（ワークスペースの .metadata に残るので、Eclipse を再起動しても覚えている）
+
+    private static final String SETTINGS_SECTION = "SpdView";
+    private static final String KEY_LAST_SAVED = "lastSaved";
+
+    private static IDialogSettings settings() {
+        IDialogSettings all = Activator.getDefault().getDialogSettings();
+        IDialogSettings section = all.getSection(SETTINGS_SECTION);
+        return section != null ? section : all.addNewSection(SETTINGS_SECTION);
+    }
+
+    private static IPath lastSaved() {
+        String s = settings().get(KEY_LAST_SAVED);
+        return s == null || s.isEmpty() ? null : org.eclipse.core.runtime.Path.fromPortableString(s);
+    }
+
+    private static void rememberLastSaved(IFile file) {
+        settings().put(KEY_LAST_SAVED, file.getFullPath().toPortableString());
     }
 
     private static void writeFile(IFile file, String text) throws CoreException {
