@@ -193,11 +193,11 @@ public class SpdView extends ViewPart {
         return s == null || s.isEmpty() ? null : org.eclipse.core.runtime.Path.fromPortableString(s);
     }
 
-    private static void rememberLastSaved(IFile file) {
+    static void rememberLastSaved(IFile file) {
         settings().put(KEY_LAST_SAVED, file.getFullPath().toPortableString());
     }
 
-    private static void writeFile(IFile file, String text) throws CoreException {
+    static void writeFile(IFile file, String text) throws CoreException {
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);   // .spd は UTF-8（plugin.xml のコンテンツタイプ）
         if (file.exists()) {
             file.setContents(new ByteArrayInputStream(bytes), true, true, null);

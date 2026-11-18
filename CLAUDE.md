@@ -25,7 +25,8 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 │   │   ├── SpdBrowser.java Browser で web/editor.html を表示し、約束事の Java 側を持つ（エディタ・ビュー共用）
 │   │   ├── SpdView.java    ファイルなしで使う SPD ビュー（主な使い方）。内容は .metadata に自動保管、
 │   │   │                   「保存…」で名前を付けて .spd に保存
-│   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（保存＝上書き、ダーティ表示）
+│   │   ├── SpdEditor.java  .spd ファイルを開いたときのエディタ（画面の「保存」・Ctrl+S＝今の名前を入れた保存ダイアログ。
+│   │   │                   メニューの「保存」＝上書き。ダーティ表示）
 │   │   └── SpdNewFileWizard.java  新規 .spd 作成ウィザード（言語を選ぶ）
 │   │   └── OpenFontFolderHandler.java  メニュー「SPD → フォントのフォルダを開く」（web/fonts/ を開く）
 │   │   └── SpdPreferencePage.java  設定ページ「ウィンドウ → 設定 → SPD」。利用モード（default／import／exam）を選ぶ（v1.29.0）
@@ -67,7 +68,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 | Java → JS | `getSpdText()` | 保存用に現在の SPD テキストを文字列で返す |
 | JS → Java | `spdGetInitialText()` | ファイル内容を取得する（Java の BrowserFunction） |
 | JS → Java | `spdNotifyChanged()` | 編集されたら呼ぶ（エディタ：未保存表示。ビュー：自動保管） |
-| JS → Java | `spdRequestSave()` | Ctrl+S・「保存」ボタン（エディタ：上書き保存。ビュー：名前を付けて保存） |
+| JS → Java | `spdRequestSave()` | Ctrl+S・「保存」ボタン（どちらも名前を付けて保存。エディタは今のファイル名を入れて開く） |
 | JS → Java | `spdGetClipboardText()` | Import 用にクリップボードの文字列を返す（WebView2 では `navigator.clipboard.readText()` が許可しても読めないため。v1.21.2〜） |
 
 - Java から JS へ文字列を渡すときは、`execute("f('" + text + "')")` のような文字列連結をしない。
@@ -123,7 +124,7 @@ eclipse-spd-plugin/          （GitHub: kawaba/eclipse-spd-plugin）
 3. 新規 `.spd` ファイル作成ウィザード（`org.eclipse.ui.newWizards`）
 4. コード生成機能（方式は未決定：ルールベース変換 / Copilot 連携 / Claude Code CLI 呼び出し）
    - API キーをプラグインに埋め込まない。必要なら設定画面（PreferencePage）で利用者が入力する
-5. 「名前を付けて保存」、ワークスペース外ファイル（IURIEditorInput）への対応
+5. 「名前を付けて保存」（済。v1.29.0-3）、ワークスペース外ファイル（IURIEditorInput）への対応
 6. ヘルプ（アイコンとライセンスは済み。ライセンスは EPL-2.0：`LICENSE`・`feature.xml`・MANIFEST の `Bundle-License`）
 
 ## ビルド
