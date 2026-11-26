@@ -151,4 +151,73 @@ var SPD_PATTERNS = `
             ├─
             └─
 
+★設定ファイル（H2）
+設定ファイル：application.properties
+│
+└─データベース設定
+      ├─データベース：H2
+      │
+      ├─接続
+      │    ├─接続URL
+      │    │    ├─DB名：
+      │    │    └─記録場所：インメモリー　※ファイルに保存するときは「ファイル」とし、下に「保存先：」を加える
+      │    │
+      │    └─認証情報
+      │          ├─ユーザー名：sa
+      │          └─パスワード：なし
+      │
+      ├─JPA
+      │    ├─スキーマ自動生成：create-drop
+      │    ├─SQL ログを表示する
+      │    ├─SQL を見やすく整形する
+      │    └─Open Session in View を有効にしない
+      │
+      └─H2コンソール
+            ├─H2コンソールを有効にする
+            └─パス：/h2-console
+
+★設定ファイル（PostgreSQL）
+設定ファイル：application.properties
+│
+└─データベース設定
+      ├─データベース：PostgreSQL
+      │
+      ├─接続
+      │    ├─接続URL
+      │    │    ├─ホスト名：localhost
+      │    │    ├─ポート番号：5432
+      │    │    └─DB名：
+      │    │
+      │    └─認証情報
+      │          ├─ユーザー名：postgres
+      │          └─パスワード：
+      │
+      └─JPA
+            ├─スキーマ自動生成：update
+            ├─SQL ログを表示する
+            ├─SQL を見やすく整形する
+            └─Open Session in View を有効にしない
+
+★設定ファイル（MySQL）
+設定ファイル：application.properties
+│
+└─データベース設定
+      ├─データベース：MySQL
+      │
+      ├─接続
+      │    ├─接続URL
+      │    │    ├─ホスト名：localhost
+      │    │    ├─ポート番号：3306
+      │    │    └─DB名：
+      │    │
+      │    └─認証情報
+      │          ├─ユーザー名：root
+      │          └─パスワード：
+      │
+      └─JPA
+            ├─スキーマ自動生成：update
+            ├─SQL ログを表示する
+            ├─SQL を見やすく整形する
+            └─Open Session in View を有効にしない
+
 `;
