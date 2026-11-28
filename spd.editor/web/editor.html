@@ -47,6 +47,14 @@
     border:1px solid var(--line-strong); border-radius:6px; cursor:pointer;
   }
   select.skeleton:hover{ background:var(--accent-bg); }
+  /* パッケージの行を入れるボタン（タイトル行・スケルトンの左・Spring だけ・v1.30.0・SK-08） */
+  button.pkgbtn{
+    font-family:var(--mono); font-size:12px; height:28px; padding:0 8px;
+    background:#fff; color:var(--text);
+    border:1px solid var(--line-strong); border-radius:6px; cursor:pointer;
+  }
+  button.pkgbtn:hover{ background:var(--accent-bg); }
+  button.pkgbtn[hidden]{ display:none; }
   /* 言語選択ラジオ と ファイル名表示 を 20px あけて横並びにする */
   .titleleft{ display:flex; align-items:center; gap:20px; }
   .filename{ font-size:12px; color:var(--text-dim); white-space:nowrap; }
@@ -120,13 +128,14 @@
     <span class="filename" id="filename"></span>
   </div>
   <div class="titleright">
+    <button class="pkgbtn" id="pkgbtn" title="文字入力欄のカーソル位置に「※パッケージ名」を差し込む（覚えている名前を使う）。Enter で挿入、Shift+Enter で上書き。Shift+クリックでクリップボードの package 文を読み取り、その名前を覚えて使う" hidden>パッケージ</button>
     <select class="skeleton" id="skeleton" title="スケルトン（決まった枝のひな形）をカーソル位置へ貼り付け" hidden></select>
     <div class="helplinks">
       <a class="helplink" id="lnkHelp" href="#" target="_blank" rel="noopener noreferrer" title="SPDエディタの使い方">&#x2753;</a>
       <a class="helplink" id="lnkGuide" href="#" target="_blank" rel="noopener noreferrer" title="SPDの解説・書き方">&#x1F4D6;</a>
       <a class="helplink" id="lnkPattern" href="#" target="_blank" rel="noopener noreferrer" title="SPDの記述パターン">&#x1F4A1;</a>
     </div>
-    <h1>SPD Editor<span class="ver">ver. 1.29.0</span></h1>
+    <h1>SPD Editor<span class="ver">ver. 1.30.0</span></h1>
   </div>
 </div>
 
@@ -426,6 +435,7 @@ function renderToolbox(){
     langbar.appendChild(label);
   });
 
+  pkgBtnEl.hidden = currentLang !== "spring";   // パッケージの行は Spring だけ（SK-08）
   updateHelpLinks();   // 💡 のリンク先を現在の言語に追従させる
   updateSkeletons();   // スケルトンを現在の言語のものにする（SK-07）
 }
@@ -1464,6 +1474,51 @@ function insertSkeleton(i){
   updateInfo();
   infoEl.textContent = "スケルトン「" + p.title + "」を貼り付けました";
 }
+
+/* ===== パッケージの行（v1.30.0・SK-08） =====
+   Spring の規約（20.7「パッケージ」）では、パッケージ名をタイトル行の前に「※jp.kwebs.bookshop.entity」と書く。
+   「パッケージ」ボタンで、文字入力欄のカーソル位置に「※<パッケージ名>」を差し込む（Shift+記号ボタン・TX-20 と同じ）。
+   グリッドへは、いつもの Enter（挿入）・Shift+Enter（上書き）で書く。
+   パッケージ名は覚えているものを使い、クリップボードは読まない（ブラウザが読むたびに許可を求めることがあるため）。
+   Shift+クリックのときと、まだ何も覚えていないときだけ、クリップボードの package 文（「package jp.kwebs.bookshop;」）か
+   パッケージ名を読み取って覚える。受け取るのはパッケージ名の形の文字列だけなので、SPD の持ち込みにはならず、
+   利用モード（LG-13）に関係なく使える。パッケージ名は SPD の本文の 1 行になるので Export にも出る */
+const pkgBtnEl = document.getElementById("pkgbtn");
+const PKG_STORE_KEY = "spd-editor:basePackage";       // 覚えているパッケージ名
+const PKG_RE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/;   // 規約の「英小文字で始まる語を . でつないだもの」
+
+/* 文字列からパッケージ名を取り出す。package 文（ファイル全体でもよい。最初のもの）か、. を含むパッケージ名だけ
+   （1 語だけのものは、変数名などをコピーしていた場合と見分けられないので受け取らない）。形が違えば null */
+function pkgFromText(text){
+  const t = String(text || "");
+  const m = t.match(/^\s*package\s+([\w.]+)\s*;/m);
+  if (m) return PKG_RE.test(m[1]) ? m[1] : null;
+  const p = t.trim();
+  return p.includes(".") && PKG_RE.test(p) ? p : null;
+}
+
+function loadBasePkg(){ try { return localStorage.getItem(PKG_STORE_KEY) || ""; } catch (e){ return ""; } }
+function saveBasePkg(p){ try { localStorage.setItem(PKG_STORE_KEY, p); } catch (e){} }
+
+/* fromClipboard＝Shift+クリック。覚えている名前が無いときもクリップボードを読む */
+function doPackage(fromClipboard){
+  const saved = loadBasePkg();
+  if (!fromClipboard && saved){ putPackage(saved); return; }
+  // 読めない（許可されない・http で開いた など）ときも「無い」として扱う
+  Promise.resolve().then(readClipboardText).then(pkgFromText, () => null).then(p => {
+    if (p){ saveBasePkg(p); putPackage(p); return; }
+    infoEl.textContent = "クリップボードにパッケージ名がありません。package 文をコピーしてから Shift+「パッケージ」を押してください";
+  });
+}
+function putPackage(p){
+  insertIntoCap("※" + p);
+  infoEl.textContent = "文字入力欄に「※" + p + "」を入れました。Enter で挿入、Shift+Enter で上書きします"
+                     + "（別のパッケージにするときは、package 文をコピーして Shift+「パッケージ」）";
+}
+
+// 文字入力欄のフォーカスとカーソル位置を保ったまま差し込めるよう、ボタンへのフォーカス移動を抑える（記号ボタンと同じ）
+pkgBtnEl.addEventListener("mousedown", e => e.preventDefault());
+pkgBtnEl.addEventListener("click", e => doPackage(e.shiftKey));
 
 /* ===== 保存／開く =====
    File System Access API（Chrome・Edge）が使える場合は showSaveFilePicker /
